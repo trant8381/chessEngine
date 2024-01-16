@@ -887,26 +887,26 @@ int main() {
     file.open("./build/generatedTables.txt", std::ios_base::app);
 
     // generate tables
-    // generateKnightBitboards(file);
-    // file << "\n";
-    // generateKingBitboards(file);
-    // file << "\n";
-    // generateRookBlockerBitboards(file);
-    // file << "\n";
-    // generateRookMagics(file);
-    // file << "\n";
-    // generateBishopBlockers(file);
-    // file << "\n";
-    // generateBishopMagicNumberLengths(file);
-    // file << "\n";
-    // generateBishopMagics(file);
-    // file << "\n";
+    generateKnightBitboards(file);
+    file << "\n";
+    generateKingBitboards(file);
+    file << "\n";
+    generateRookBlockerBitboards(file);
+    file << "\n";
+    generateRookMagics(file);
+    file << "\n";
+    generateBishopBlockers(file);
+    file << "\n";
+    generateBishopMagicNumberLengths(file);
+    file << "\n";
+    generateBishopMagics(file);
+    file << "\n";
     generateRookPinMasks(file);
     file << "\n";
     generateRookTwoPieceAttacks(file);
     file << "\n";
-    // generateBishopPinmasks(file);
-    // file << "\n";
-    // generateBishopTwoPieceAttacks(file);
+    generateBishopPinmasks(file);
+    file << "\n";
+    generateBishopTwoPieceAttacks(file);
     file.close();
 }

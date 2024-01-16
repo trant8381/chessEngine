@@ -5,6 +5,9 @@
 #include "Tables.h"
 #include "Types.h"
 #include <algorithm>
+#include <array>
+#include <bit>
+#include <cstdlib>
 #include <fstream>
 #include <ios>
 #include <iostream>
@@ -12,6 +15,7 @@
 #include <x86intrin.h>
 #include <ostream>
 #include <set>
+#include <armadillo>
 
 // debugging function to print U64 to binary
 void printBoard(U64 board) {
@@ -136,9 +140,29 @@ void Position::whitePawnMoves(Moveset &moveset) {
 		if (doubleUp != 0) {
 			moveset.doubleMoves.push_back({index, __builtin_ctzll(doubleUp), __builtin_ctzll(up)});
 		}
-
 		if (canEnPassant != 0) {
 			moveset.enPassant.push_back({index, __builtin_ctzll(canEnPassant)});
+		}
+	}
+
+	U64 promoting = whitePawns & Tables::rank7;
+	popCount = __builtin_popcountll(promoting);
+	for (int _ = 0; _ < popCount; _++) {
+		int index = lsb(promoting);
+		U64 pawn = 1ULL << index;
+		U64 up = (pawn << 8) & emptySquares;
+		U64 rightAttack = ((pawn & Tables::notFileH) << 7);
+		U64 leftAttack = ((pawn & Tables::notFileA) << 9);
+		U64 rightCapture = rightAttack & blackPieces;
+		U64 leftCapture = leftAttack & blackPieces;
+		U64 targets = (up | rightCapture | leftCapture) & checkMask & grid[index].pinMask;
+
+		int targetsPopCount = __builtin_popcountll(targets);
+		for (int _ = 0; _ < targetsPopCount; _++) {
+			moveset.promotion.push_back({index, lsb(targets), 10});
+			moveset.promotion.push_back({index, lsb(targets), 6});
+			moveset.promotion.push_back({index, lsb(targets), 4});
+			moveset.promotion.push_back({index, lsb(targets), 2});
 		}
 	}
 }
@@ -180,7 +204,28 @@ void Position::blackPawnMoves(Moveset &moveset) {
 			moveset.enPassant.push_back({index, __builtin_ctzll(canEnPassant)});
 		}
 	}
-	
+
+	U64 promoting = blackPawns & Tables::rank2;
+	popCount = __builtin_popcountll(promoting);
+	for (int _ = 0; _ < popCount; _++) {
+		int index = lsb(promoting);
+		U64 pawn = 1ULL << index;
+		U64 up = (pawn >> 8) & emptySquares;
+		U64 doubleUp = ((up & Tables::rank6) >> 8) & emptySquares & checkMask & grid[index].pinMask;
+		U64 rightAttack = ((pawn & Tables::notFileH) >> 9);
+		U64 leftAttack = ((pawn & Tables::notFileA) >> 7);
+		U64 rightCapture = rightAttack & whitePieces;
+		U64 leftCapture = leftAttack & whitePieces;
+		U64 targets = (up | rightCapture | leftCapture) & checkMask & grid[index].pinMask;
+
+		int targetsPopCount = __builtin_popcountll(targets);
+		for (int _ = 0; _ < targetsPopCount; _++) {
+			moveset.promotion.push_back({index, lsb(targets), 11});
+			moveset.promotion.push_back({index, lsb(targets), 7});
+			moveset.promotion.push_back({index, lsb(targets), 5});
+			moveset.promotion.push_back({index, lsb(targets), 3});
+		}
+	}
 }
 
 // gets the attack bitboard of one knight
@@ -735,6 +780,33 @@ Position Position::makeDoubleMove(int& start, int& end, int& canEnPassant) {
 	return newPosition;
 }
 
+Position Position::makePromotionMove(int& start, int& end, int& bitboardIndex) {
+	Position newPosition = copy();
+	Piece piece = grid[start];
+	piece.hasMoved = true;
+	Piece capturedPiece = grid[end];
+
+	newPosition.grid[start] = Piece(15, 15);
+	newPosition.grid[end] = Piece(bitboardIndex, piece.colorBitboardIndex);
+
+	*newPosition.bitboardPointers[capturedPiece.bitboardIndex] &= ~(1Ull << end);
+	*newPosition.bitboardPointers[capturedPiece.colorBitboardIndex] &= ~(1ULL << end);
+
+	U64& pawnBoard = *newPosition.bitboardPointers[piece.bitboardIndex];
+	U64& newBoard = *newPosition.bitboardPointers[bitboardIndex];
+ 	U64 notStart = ~(1ULL << start);
+	U64 endBoard = (1ULL << end);
+
+	pawnBoard = pawnBoard & notStart;
+	newBoard = newBoard | endBoard;
+
+	U64& colorBoard = *newPosition.bitboardPointers[piece.colorBitboardIndex];
+	colorBoard = (colorBoard & notStart) | endBoard;
+	newPosition.pieces = (pieces & notStart) | endBoard;
+
+	return newPosition;
+}
+
 U64 Position::perft(int depth, std::stack<Position>& movelist) {
 
 	Moveset moveset;
@@ -779,6 +851,14 @@ U64 Position::perft(int depth, std::stack<Position>& movelist) {
 	int& doubleMovesSize = doubleMoves.size;
 	for (int move = 0; move < doubleMovesSize; move++) {
 		movelist.push(makeDoubleMove(doubleMoves[move][0], doubleMoves[move][1], doubleMoves[move][2]));
+		nodes += movelist.top().perft(depth - 1, movelist);
+		movelist.pop();
+	}
+
+	Array<std::array<int, 3>, 64>& promotions = moveset.promotion;
+	int& promotionSize = promotions.size;
+	for (int move = 0; move < promotionSize; move++) {
+		movelist.push(makePromotionMove(promotions[move][0], promotions[move][1], promotions[move][2]));
 		nodes += movelist.top().perft(depth - 1, movelist);
 		movelist.pop();
 	}
@@ -857,4 +937,178 @@ std::string Position::toFen() {
 	fen += std::to_string(moveCount);
 
 	return fen;
+}
+
+void Position::setFen(std::string fen) {
+	whitePawns = 0;
+	blackPawns = 0;
+	blackRooks = 0;
+	whiteRooks = 0;
+	blackKnights = 0;
+	whiteKnights = 0;
+	blackBishops = 0;
+	whiteBishops = 0;
+	blackKing = 0;
+	whiteKing = 0;
+	blackQueens = 0;
+	whiteQueens = 0;
+	whitePieces = 0;
+	blackPieces = 0;
+	pieces = 0;
+
+	int index = 0;
+	bool stop = false;
+	int currentFenInstruction = 1;
+	std::string res = "";
+
+	for (char& ch : fen) {
+		if (stop) {
+			if (ch == ' ') {
+				switch(currentFenInstruction) {
+					case 1:
+						isWhiteTurn = res == "w";
+						break;
+					case 2:
+						break;
+					case 3:
+						enPassant = 1ULL << std::distance(Tables::chessCoordinates.begin(), 
+												 find(Tables::chessCoordinates.begin(), Tables::chessCoordinates.end(), res));
+					case 4:
+						break;
+					case 5:
+						moveCount = stoi(res);
+				}
+				currentFenInstruction += 1;
+			}
+			res += ch;
+		}
+		switch (ch) {
+			case ' ':
+				std::cout << index << std::endl;
+				stop = true;
+				break;
+			case '/':
+				break;
+			case 'p':
+				blackPawns = blackPawns || (1ULL << index);
+				blackPieces = blackPieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(1, 13);
+				break;
+			case 'r':
+				blackRooks = blackRooks || (1ULL << index);
+				blackPieces = blackPieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(3, 13);
+				break;
+			case 'n':
+				blackKnights = blackKnights || (1ULL << index);
+				blackPieces = blackPieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(5, 13);
+				break;
+			case 'b':
+				blackBishops = blackBishops || (1ULL << index);
+				blackPieces = blackPieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(7, 13);
+				break;
+			case 'k':
+				blackKing = blackKing || (1ULL << index);
+				blackPieces = blackPieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(9, 13);
+				break;
+			case 'q':
+				blackQueens = blackQueens || (1ULL << index);
+				blackPieces = blackPieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(11, 13);
+				break;
+			case 'P':
+				whitePawns = whitePawns || (1ULL << index);
+				whitePieces = whitePieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(0, 12);
+				break;
+			case 'R':
+				whiteRooks = whiteRooks || (1ULL << index);
+				whitePieces = whitePieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(2, 12);
+				break;
+			case 'N':
+				whiteKnights = whiteKnights || (1ULL << index);
+				whitePieces = whitePieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(4, 12);
+				break;
+			case 'B':
+				whiteBishops = whiteBishops || (1ULL << index);
+				whitePieces = whitePieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(6, 12);
+				break;
+			case 'K':
+				whiteKing = whiteKing || (1ULL << index);
+				whitePieces = whitePieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(8, 12);
+				break;
+			case 'Q':
+				whiteQueens = whiteQueens || (1ULL << index);
+				whitePieces = whitePieces || (1ULL << index);
+				pieces = pieces || (1ULL << index);
+				grid[index] = Piece(10, 12);
+				break;
+			default:
+				int emptySpaces = ch - 48;
+				for (int i = index; i < (index + emptySpaces); i++) {
+					grid[i] = Piece(15, 15);
+				}
+
+				index += emptySpaces;
+				break;
+		}
+
+		index += 1;
+	}
+}
+
+int Position::orient(bool& turn, int& piece) {
+	return (63 * (!turn)) ^ piece;
+}
+
+int Position::halfkpIndex(bool& turn, int king, int& piece, int& index) {
+	return orient(turn, piece) + Tables::fromPiece[index] + (10 * 64 + 1) * king;
+}
+
+std::array<arma::sp_mat, 2> Position::halfkp() {
+	int whiteKingIndex = __builtin_ctzll(whiteKing);
+	int blackKingIndex = __builtin_ctzll(blackKing);
+	
+	Array<arma::sp_mat, 2> results = Array<arma::sp_mat, 2>(0, {});
+
+	for (bool turn : {isWhiteTurn, !isWhiteTurn}) {
+		Array<int, 32> indices = Array<int, 32>(0, {});
+		Array<double, 32> values = Array<double, 32>(0, {});
+		int king = 0;
+
+		if (isWhiteTurn) {
+			king = __builtin_ctzll(whiteKing);
+		} else {
+			king = __builtin_ctzll(blackKing);
+		}
+		
+		U64 copy = pieces & ~(blackKing | whiteKing);
+		int popCount = __builtin_popcountll(copy);
+		for (int i = 0; i < popCount; i++) {
+			int piece = lsb(copy);
+			U64 mask = (1ULL << piece);
+
+			indices.push_back(halfkpIndex(turn, orient(turn, king), piece, grid[piece].bitboardIndex));
+			values.push_back(1.0);
+		}
+		results.push_back(arma::sp_mat(arma::mat(indices.array), values.array));
+	}
 }

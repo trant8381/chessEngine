@@ -71,14 +71,13 @@ struct Moveset {
         castle: castling moves, same structure as normal, but has a second set of moves
         enPassant: en passant moves, same structure as normal
         doubleMoves: double pawn moves, same structure as normal
-        kingMoves: king moves, same structure as normal
     */
 
     Array<std::array<int, 2>, 218> normal = Array<std::array<int, 2>, 218>(0, {});
     Array<std::array<std::array<int, 2>, 2>, 2> castle = Array<std::array<std::array<int, 2>, 2>, 2>(0, {});
     Array<std::array<int, 2>, 2> enPassant = Array<std::array<int, 2>, 2>(0, {});
     Array<std::array<int, 3>, 8> doubleMoves = Array<std::array<int, 3>, 8>(0, {});
-
+    Array<std::array<int, 3>, 64> promotion = Array<std::array<int, 3>, 64>(0, {});
 
     Moveset() {
 

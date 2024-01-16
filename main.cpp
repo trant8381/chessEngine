@@ -10,13 +10,13 @@
 
 int main() {
     Position startPosition;
-
+    
     U64 nodes = 0;
 
     std::stack<Position> movelist;
     movelist.push(std::move(startPosition));
 
-    std::cout << movelist.top().perft(6, movelist) << std::endl;
+    std::cout << movelist.top().perft(1, movelist) << std::endl;
 
     return 0;
 }

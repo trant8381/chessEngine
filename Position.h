@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <stack>
 #include <string>
+#include <armadillo>
 
 class Position {
 public:
@@ -33,9 +34,14 @@ public:
     Position makeEnPassantMove(int& start, int& end);
     Position makeCastlingMove(int& start1, int& end1, int& start2, int& end2);
     Position makeDoubleMove(int& start, int& end, int& canEnPassant);
+    Position makePromotionMove(int& start, int& end, int& bitboardIndex);
     Position copy();
     U64 perft(int depth, std::stack<Position>& movelist);
     std::string toFen();
+    void setFen(std::string fen);
+    int orient(bool& turn, int& square);
+    int halfkpIndex(bool& turn, int king, int& piece, int& index);
+    std::array<arma::sp_mat, 2> halfkp();
 private:
     // intialize piece bitboards
     U64 whitePawns = 0x000000000000FF00;

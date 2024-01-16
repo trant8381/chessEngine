@@ -1,5 +1,5 @@
 main:
-	clang++ main.cpp Position.cpp -O3 -Wno-narrowing -flto -mbmi -o ./build/out -std=c++17
+	clang++ main.cpp Position.cpp -I./libtorch/lib -Llibtorch -O3 -Wno-narrowing -flto -mbmi -o ./build/out -std=c++17
 	./build/out
 
 table:
