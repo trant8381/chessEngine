@@ -1166,7 +1166,7 @@ std::array<torch::Tensor, 2> Position::halfkp() {
 									  torch::from_blob(indices.data(), {indicesSize}, options), 0)
 									  .to(torch::kInt64).cuda();
 		torch::Tensor valuesTensor = torch::ones({indicesSize}).cuda();
-		res.push_back(torch::sparse_coo_tensor(indicesTensor, valuesTensor, {40960}));
+		res.push_back(torch::sparse_coo_tensor(indicesTensor, valuesTensor, {40960}).cuda());
 	}
 
 	return res.array;
