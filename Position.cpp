@@ -1161,13 +1161,12 @@ std::array<torch::Tensor, 2> Position::halfkp() {
 		}
 
 		int indicesSize = indices.size();
-		auto options = torch::TensorOptions(torch::kCUDA).dtype(torch::kInt64);
+		auto options = torch::TensorOptions().dtype(torch::kInt64);
 		torch::Tensor indicesTensor = torch::unsqueeze(
 									  torch::from_blob(indices.data(), {indicesSize}, options), 0)
-									  .to(torch::kCUDA)
-									  .to(torch::kInt64);
-		torch::Tensor valuesTensor = torch::ones({indicesSize}, torch::kCUDA);
-		res.push_back(torch::sparse_coo_tensor(indicesTensor, valuesTensor, {40960}, torch::kCUDA));
+									  .to(torch::kInt64).cuda();
+		torch::Tensor valuesTensor = torch::ones({indicesSize}).cuda();
+		res.push_back(torch::sparse_coo_tensor(indicesTensor, valuesTensor, {40960}));
 	}
 
 	return res.array;

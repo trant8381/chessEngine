@@ -25,6 +25,7 @@ int main() {
     int eval;
     NNUE model = NNUE();
     model->to(device);
+
     torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.001);
     torch::nn::MSELoss lossFunction = torch::nn::MSELoss();
     
@@ -47,9 +48,9 @@ int main() {
             std::array<torch::Tensor, 2> halfkp = position.halfkp();
             optimizer.zero_grad();
 
-            torch::Tensor output = model->forward(halfkp[0], halfkp[1]);
+            torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
             std::vector<double> vec = {static_cast<double>(eval)};
-            torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).to(torch::kCUDA));
+            torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat))).cuda();
 
             loss.backward();
             torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
@@ -66,7 +67,7 @@ int main() {
     Position position;
     position.setFen("3r2k1/5p2/p3p1p1/1P3q1p/2p3nP/5BP1/1P2QPK1/1R6 b - - 0 32");
     std::array<torch::Tensor, 2> halfkp = position.halfkp();
-    torch::Tensor output = model->forward(halfkp[0], halfkp[1]);
+    torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
     std::cout << output << std::endl;
     torch::save(model, "model.pt");
 
@@ -76,7 +77,7 @@ int main() {
 
     NNUE module;
     torch::load(module, "model.pt");
-    output = module->forward(halfkp[0], halfkp[1]);
+    output = module->forward(halfkp[0], halfkp[1]).cuda();
     std::cout << output << std::endl;
 
     return 0;
