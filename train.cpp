@@ -33,35 +33,34 @@ int main() {
     
     double runningLoss = 0;
     double lastLoss = 0;
-    int inputs = 0;
 
     model->train();
-    while (std::getline(positions, fen)) {
-        if (fen[0] == '\n') {
-            continue;
+    for (int epoch = 0; epoch < 1; epoch++) {
+        int inputs = 0;
+        while (std::getline(positions, fen)) {
+            if (fen[0] == '\n') {
+                continue;
+            }
+            evals >> eval;
+            Position position;
+            position.setFen(fen);
+            std::array<torch::Tensor, 2> halfkp = position.halfkp();
+            optimizer.zero_grad();
+
+            torch::Tensor output = model->forward(halfkp[0], halfkp[1]);
+            std::vector<double> vec = {static_cast<double>(eval)};
+            torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)));
+
+            loss.backward();
+            torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
+            optimizer.step();
+
+            runningLoss += loss.item().to<double>();
+            inputs += 1;
+            std::cout << inputs << std::endl;
         }
-        if (inputs == 50) {
-            break;
-        }
-        evals >> eval;
-        Position position;
-        position.setFen(fen);
-        std::array<torch::Tensor, 2> halfkp = position.halfkp();
-        optimizer.zero_grad();
-
-        torch::Tensor output = model->forward(halfkp[0], halfkp[1]);
-        std::vector<double> vec = {static_cast<double>(eval)};
-        torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)));
-
-        loss.backward();
-        torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
-        optimizer.step();
-
-        runningLoss += loss.item().to<double>();
-        inputs += 1;
-        std::cout << inputs << std::endl;
+        std::cout << runningLoss / inputs << std::endl;
     }
-    std::cout << runningLoss / 85000.0 << std::endl;
 
     model->eval();
     Position position;
@@ -69,9 +68,16 @@ int main() {
     std::array<torch::Tensor, 2> halfkp = position.halfkp();
     torch::Tensor output = model->forward(halfkp[0], halfkp[1]);
     std::cout << output << std::endl;
+    torch::save(model, "model.pt");
 
     evals.close();
     positions.close();
+
+
+    NNUE module;
+    torch::load(module, "model.pt");
+    output = module->forward(halfkp[0], halfkp[1]);
+    std::cout << output << std::endl;
 
     return 0;
 }
