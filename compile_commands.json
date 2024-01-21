@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/itno/chess",
+  "command": "/usr/bin/c++ -DUSE_C10D_GLOO -DUSE_DISTRIBUTED -DUSE_RPC -DUSE_TENSORPIPE -isystem /home/itno/chess/libtorch/include -isystem /home/itno/chess/libtorch/include/torch/csrc/api/include  -D_GLIBCXX_USE_CXX11_ABI=0 -std=gnu++17 -D_GLIBCXX_USE_CXX11_ABI=0 -o CMakeFiles/train.dir/train.cpp.o -c /home/itno/chess/train.cpp",
+  "file": "/home/itno/chess/train.cpp",
+  "output": "CMakeFiles/train.dir/train.cpp.o"
+}
+]

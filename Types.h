@@ -31,6 +31,12 @@ struct Piece {
         colorBitboardIndex = _colorBitboardIndex;
     }
 
+    Piece(int _bitboardIndex, int _colorBitboardIndex, bool _hasMoved) {
+        bitboardIndex = _bitboardIndex;
+        colorBitboardIndex = _colorBitboardIndex;
+        hasMoved = _hasMoved;
+    }
+
     Piece() {
         hasMoved = true;
     }
@@ -75,7 +81,7 @@ struct Moveset {
 
     Array<std::array<int, 2>, 218> normal = Array<std::array<int, 2>, 218>(0, {});
     Array<std::array<std::array<int, 2>, 2>, 2> castle = Array<std::array<std::array<int, 2>, 2>, 2>(0, {});
-    Array<std::array<int, 2>, 2> enPassant = Array<std::array<int, 2>, 2>(0, {});
+    Array<std::array<int, 3>, 2> enPassant = Array<std::array<int, 3>, 2>(0, {});
     Array<std::array<int, 3>, 8> doubleMoves = Array<std::array<int, 3>, 8>(0, {});
     Array<std::array<int, 3>, 64> promotion = Array<std::array<int, 3>, 64>(0, {});
 
