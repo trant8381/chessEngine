@@ -1139,7 +1139,7 @@ std::array<torch::Tensor, 2> Position::halfkp() {
 	Array<torch::Tensor, 2> res = Array<torch::Tensor, 2>(0, {});
 
 	for (bool turn : {isWhiteTurn, !isWhiteTurn}) {
-		std::vector<U64> indices;
+		std::vector<int64_t> indices;
 		std::vector<int16_t> values;
 		int king = 0;
 
@@ -1160,7 +1160,7 @@ std::array<torch::Tensor, 2> Position::halfkp() {
 		}
 
 		int indicesSize = indices.size();
-		auto options = torch::TensorOptions().dtype(torch::kUInt64);
+		auto options = torch::TensorOptions().dtype(torch::kInt64);
 		torch::Tensor indicesTensor = torch::unsqueeze(
 									  torch::from_blob(indices.data(), {indicesSize}, options), 0)
 									  .to(torch::kInt64);

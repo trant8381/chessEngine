@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(train)
+set(CAFFE2_USE_CUDNN 1)
 set(CMAKE_PREFIX_PATH ./libtorch)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(Torch REQUIRED)
