@@ -51,10 +51,12 @@ int main() {
             std::array<torch::Tensor, 2> halfkp = position.halfkp();
             optimizer.zero_grad();
 
+            std::cout << std::endl;
             torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
             std::vector<double> vec = {static_cast<double>(eval)};
             std::cout << torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda() << std::endl;
             std::cout << output << std::endl;
+            std::cout << std::endl;
             torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
             loss.backward();
