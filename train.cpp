@@ -36,13 +36,13 @@ int main() {
     double lastLoss = 0;
 
     model->train();
-    for (int epoch = 0; epoch < 1; epoch++) {
+    for (int epoch = 0; epoch < 10; epoch++) {
         int inputs = 0;
         while (std::getline(positions, fen)) {
             if (fen[0] == '\n') {
                 continue;
             }
-            if (inputs == 50) {
+            if (inputs == 1000) {
                 break;
             }
             evals >> eval;
@@ -51,12 +51,8 @@ int main() {
             std::array<torch::Tensor, 2> halfkp = position.halfkp();
             optimizer.zero_grad();
 
-            std::cout << std::endl;
             torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
             std::vector<float> vec = {static_cast<float>(eval)};
-            std::cout << torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda() << std::endl;
-            std::cout << output << std::endl;
-            std::cout << std::endl;
             torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
             loss.backward();
