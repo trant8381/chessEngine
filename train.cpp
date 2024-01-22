@@ -36,7 +36,7 @@ int main() {
     double lastLoss = 0;
 
     model->train();
-    for (int epoch = 0; epoch < 10; epoch++) {
+    for (int epoch = 0; epoch < 2; epoch++) {
         int inputs = 0;
         while (std::getline(positions, fen)) {
             if (fen[0] == '\n') {
@@ -52,6 +52,7 @@ int main() {
             optimizer.zero_grad();
 
             torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
+            std::cout << output << "\n" << eval << std::endl; 
             std::vector<float> vec = {static_cast<float>(eval)};
             torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
