@@ -45,7 +45,7 @@ int main() {
             if (fen[0] == '\n' || possibleEval[0] == '#') {
                 continue;
             }
-            if (inputs == 1000) {
+            if (inputs == 20000) {
                 break;
             }
             
@@ -67,9 +67,9 @@ int main() {
 
             runningLoss += loss.item().to<double>();
             inputs += 1;
-            std::cout << inputs << std::endl;
         }
         std::cout << runningLoss / inputs << std::endl;
+        std::cout << epoch << std::endl;
         evals.close();
         positions.close();  
     }
