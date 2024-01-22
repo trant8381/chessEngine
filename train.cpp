@@ -29,15 +29,14 @@ int main() {
     torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.001);
     torch::nn::MSELoss lossFunction = torch::nn::MSELoss();
     
-    evals.open("../data/evals.txt", std::ios_base::in);
-    positions.open("../data/positions.txt", std::ios_base::in);
-    
     double runningLoss = 0;
     double lastLoss = 0;
 
     model->train();
     for (int epoch = 0; epoch < 2; epoch++) {
         int inputs = 0;
+        evals.open("../data/evals.txt", std::ios_base::in);
+        positions.open("../data/positions.txt", std::ios_base::in);
         while (std::getline(positions, fen)) {
             if (fen[0] == '\n') {
                 continue;
