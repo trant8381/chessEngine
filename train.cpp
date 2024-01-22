@@ -61,6 +61,7 @@ int main() {
             torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
             loss.backward();
+            torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
             optimizer.step();
 
             runningLoss += loss.item().to<double>();
