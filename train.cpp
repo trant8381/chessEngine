@@ -53,7 +53,7 @@ int main() {
 
             std::cout << std::endl;
             torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
-            std::vector<double> vec = {static_cast<double>(eval)};
+            std::vector<float> vec = {static_cast<float>(eval)};
             std::cout << torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda() << std::endl;
             std::cout << output << std::endl;
             std::cout << std::endl;
