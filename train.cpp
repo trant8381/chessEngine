@@ -53,7 +53,7 @@ int main() {
 
             torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
             std::vector<double> vec = {static_cast<double>(eval)};
-            torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat))).cuda();
+            torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
             loss.backward();
             torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
