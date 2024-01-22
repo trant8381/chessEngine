@@ -23,6 +23,8 @@ int main() {
     std::ifstream evals;
     std::string fen;
     int eval;
+    std::string possibleEval;
+
     NNUE model = NNUE();
     model->to(device);
 
@@ -38,13 +40,16 @@ int main() {
         evals.open("../data/evals.txt", std::ios_base::in);
         positions.open("../data/positions.txt", std::ios_base::in);
         while (std::getline(positions, fen)) {
-            if (fen[0] == '\n') {
+            evals >> possibleEval;
+            if (fen[0] == '\n' || possibleEval[0] == '#') {
                 continue;
             }
             if (inputs == 1000) {
                 break;
             }
-            evals >> eval;
+            
+            eval = std::stoi(possibleEval);
+
             Position position;
             position.setFen(fen);
             std::array<torch::Tensor, 2> halfkp = position.halfkp();
