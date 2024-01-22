@@ -42,6 +42,9 @@ int main() {
             if (fen[0] == '\n') {
                 continue;
             }
+            if (inputs == 50) {
+                break;
+            }
             evals >> eval;
             Position position;
             position.setFen(fen);
@@ -68,6 +71,10 @@ int main() {
     position.setFen("3r2k1/5p2/p3p1p1/1P3q1p/2p3nP/5BP1/1P2QPK1/1R6 b - - 0 32");
     std::array<torch::Tensor, 2> halfkp = position.halfkp();
     torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
+    std::cout << output << std::endl;
+    position.setFen("r3kbnr/pp3ppp/2n5/2pqN3/3Pp3/2P5/PP2bPPP/RNBQ1RK1 w kq - 0 9");
+    halfkp = position.halfkp();
+    output = model->forward(halfkp[0], halfkp[1]).cuda();
     std::cout << output << std::endl;
     torch::save(model, "model.pt");
 
