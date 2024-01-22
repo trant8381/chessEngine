@@ -19,8 +19,6 @@ int main() {
         std::cout << "CUDA is available! Training on GPU." << std::endl;
         device = torch::kCUDA;
     }
-    std::ifstream positions;
-    std::ifstream evals;
     std::string fen;
     int eval;
     std::string possibleEval;
@@ -28,17 +26,20 @@ int main() {
     NNUE model = NNUE();
     model->to(device);
 
-    torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.001);
+    torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.01);
     torch::nn::MSELoss lossFunction = torch::nn::MSELoss();
     
     double runningLoss = 0;
     double lastLoss = 0;
 
     model->train();
-    for (int epoch = 0; epoch < 2; epoch++) {
+    for (int epoch = 0; epoch < 20; epoch++) {
         int inputs = 0;
+        std::ifstream positions;
+        std::ifstream evals;
         evals.open("../data/evals.txt", std::ios_base::in);
         positions.open("../data/positions.txt", std::ios_base::in);
+
         while (std::getline(positions, fen)) {
             evals >> possibleEval;
             if (fen[0] == '\n' || possibleEval[0] == '#') {
@@ -56,7 +57,7 @@ int main() {
             optimizer.zero_grad();
 
             torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
-            std::cout << output << "\n" << eval << std::endl; 
+            // std::cout << output << "\n" << eval << std::endl; 
             std::vector<float> vec = {static_cast<float>(eval)};
             torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
@@ -69,6 +70,8 @@ int main() {
             std::cout << inputs << std::endl;
         }
         std::cout << runningLoss / inputs << std::endl;
+        evals.close();
+        positions.close();  
     }
 
     model->eval();
@@ -82,10 +85,6 @@ int main() {
     output = model->forward(halfkp[0], halfkp[1]).cuda();
     std::cout << output << std::endl;
     torch::save(model, "model.pt");
-
-    evals.close();
-    positions.close();
-
 
     NNUE module;
     torch::load(module, "model.pt");
