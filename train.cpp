@@ -41,14 +41,16 @@ int main() {
         positions.open("../data/positions.txt", std::ios_base::in);
 
         while (std::getline(positions, fen)) {
-            evals >> possibleEval;
-            if (fen[0] == '\n' || possibleEval[0] == '#') {
+            if (fen[0] == '\n') {
                 continue;
             }
             if (inputs == 20000) {
                 break;
             }
-            
+            evals >> possibleEval;
+            if (possibleEval[0] == '#') {
+                continue;
+            }
             eval = std::stoi(possibleEval);
 
             Position position;
