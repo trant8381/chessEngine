@@ -87,8 +87,8 @@ int main() {
         for (int i = 0; i < outputSplits.size(); i++) {
             std::vector<torch::Tensor>& half1 = half1Split[i];
             std::vector<torch::Tensor>& half2 = half2Split[i];
-            auto half1batch = torch::cat({half1});
-            auto half2batch = torch::cat({half2});
+            torch::Tensor half1batch = torch::stack({half1});
+            torch::Tensor half2batch = torch::stack({half2});
             optimizer.zero_grad();
 
             torch::Tensor outputs = model->forward({half1batch}, {half2batch}).cuda();
