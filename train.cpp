@@ -87,11 +87,11 @@ int main() {
         for (int i = 0; i < outputSplits.size(); i++) {
             std::vector<torch::Tensor>& half1 = half1Split[i];
             std::vector<torch::Tensor>& half2 = half2Split[i];
-            auto half1batch = torch::cat({ half1});
-            auto half2batch = torch::cat({ half2});
+            auto half1batch = torch::cat({half1});
+            auto half2batch = torch::cat({half2});
             optimizer.zero_grad();
 
-            torch::Tensor outputs = model(half1batch, half2batch).cuda();
+            torch::Tensor outputs = model->forward({half1batch}, {half2batch}).cuda();
             // std::cout << output << "\n" << eval << std::endl; 
             std::vector<float> evals = outputSplits[i];
             std::cout << outputs << std::endl;
