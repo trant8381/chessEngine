@@ -48,7 +48,7 @@ int main() {
         if (fen[0] == '\n') {
             continue;
         }
-        if (inputs == 50) {
+        if (inputs == 256) {
             break;
         }
         evals >> eval;
@@ -60,6 +60,8 @@ int main() {
         std::array<torch::Tensor, 2> data = {std::move(halfkp[0]), std::move(halfkp[1])};
         inputDataset.push_back(data);
         outputDataset.push_back(output);
+
+        inputs += 1;
     }
 
     int datasetSize = inputDataset.size();
