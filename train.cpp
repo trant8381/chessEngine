@@ -90,7 +90,10 @@ int main() {
             torch::Tensor half1batch = torch::stack(half1);
             torch::Tensor half2batch = torch::stack(half2);
             optimizer.zero_grad();
-
+            std::cout << half1batch.size(0) << std::endl;
+            std::cout << half1batch.size(1) << std::endl;
+            std::cout << half2batch.size(0) << std::endl;
+            std::cout << half2batch.size(1) << std::endl;
             torch::Tensor outputs = model(half1batch, half2batch).cuda();
             // std::cout << output << "\n" << eval << std::endl; 
             std::vector<float> evals = outputSplits[i];
