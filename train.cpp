@@ -87,8 +87,9 @@ int main() {
             std::vector<float> outputs = model->batchForward(inputSplit);
             // std::cout << output << "\n" << eval << std::endl; 
             std::vector<float> evals = outputSplits[i];
-            // std::cout << torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda() << std::endl;
+            std::cout << torch::from_blob(outputs.data(), {static_cast<long>(outputs.size())}, torch::TensorOptions().dtype(torch::kFloat)) << std::endl;
             // std::cout << output << std::endl;
+            std::cout << torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)) << std::endl;
 
             torch::Tensor loss = lossFunction(torch::from_blob(outputs.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)).cuda(),
              torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
