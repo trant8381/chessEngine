@@ -35,6 +35,7 @@ int main() {
     model->train();
     for (int epoch = 0; epoch < 20; epoch++) {
         int inputs = 0;
+        runningLoss = 0;
         std::ifstream positions;
         std::ifstream evals;
         evals.open("../data/evals.txt", std::ios_base::in);
@@ -44,7 +45,7 @@ int main() {
             if (fen[0] == '\n') {
                 continue;
             }
-            if (inputs == 20000) {
+            if (inputs == 50) {
                 break;
             }
             evals >> possibleEval;
@@ -61,6 +62,9 @@ int main() {
             torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
             // std::cout << output << "\n" << eval << std::endl; 
             std::vector<float> vec = {static_cast<float>(eval)};
+            std::cout << torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda() << std::endl;
+            std::cout << output << std::endl;
+
             torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
             loss.backward();
