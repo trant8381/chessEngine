@@ -89,6 +89,12 @@ int main() {
             std::vector<torch::Tensor>& half2 = half2Split[i];
             torch::Tensor half1batch = torch::stack(half1);
             torch::Tensor half2batch = torch::stack(half2);
+            std::cout << half1batch.size(0) << std::endl;
+            std::cout << half1batch.size(1) << std::endl;
+            std::cout << half1batch.size(2) << std::endl;
+            std::cout << half2batch.size(0) << std::endl;
+            std::cout << half2batch.size(1) << std::endl;
+            std::cout << half2batch.size(2) << std::endl;
             optimizer.zero_grad();
 
             torch::Tensor outputs = model->forward({half1batch}, {half2batch}).cuda();
