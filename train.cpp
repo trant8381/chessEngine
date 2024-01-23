@@ -1,11 +1,14 @@
 // train.cpp
 // trains a NNUE model
+#include <ATen/core/TensorBody.h>
 #include <c10/core/DeviceType.h>
 #include <c10/core/ScalarType.h>
 #include <cstdio>
 #include <fstream>
 #include <ios>
 #include <string>
+#include <torch/data/datasets/base.h>
+#include <torch/data/datasets/tensor.h>
 #include <torch/nn/modules/loss.h>
 #include <torch/torch.h>
 #include <iostream>
@@ -31,41 +34,62 @@ int main() {
     
     double runningLoss = 0;
     double lastLoss = 0;
-
+    std::vector<std::array<torch::Tensor, 2>> inputDataset;
+    std::vector<float> outputDataset;
     model->train();
+
+    std::ifstream positions;
+    std::ifstream evals;
+    evals.open("../data/evals.txt", std::ios_base::in);
+    positions.open("../data/positions.txt", std::ios_base::in);
+
+    int inputs = 0;
+    while (std::getline(positions, fen)) {
+        if (fen[0] == '\n') {
+            continue;
+        }
+        if (inputs == 50) {
+            break;
+        }
+        evals >> eval;
+
+        Position position;
+        position.setFen(fen);
+        std::array<torch::Tensor, 2> halfkp = position.halfkp();
+        float output = static_cast<float>(eval);
+        std::array<torch::Tensor, 2> data = {std::move(halfkp[0]), std::move(halfkp[1])};
+        inputDataset.push_back(data);
+        outputDataset.push_back(output);
+    }
+
+    int datasetSize = inputDataset.size();
+    int batchSize = 64;
+    std::vector<std::vector<std::array<torch::Tensor, 2>>> inputSplits;
+    std::vector<std::vector<float>> outputSplits;
+
+    for (int i = 0; i < datasetSize; i++) {
+        if (i % batchSize == 0) {
+            inputSplits.push_back({});
+            outputSplits.push_back({});
+        }
+        inputSplits[i / batchSize].push_back({inputDataset[i][0], inputDataset[i][1]});
+        outputSplits[i / batchSize].push_back(outputDataset[i]);
+    }
+
     for (int epoch = 0; epoch < 20; epoch++) {
-        int inputs = 0;
         runningLoss = 0;
-        std::ifstream positions;
-        std::ifstream evals;
-        evals.open("../data/evals.txt", std::ios_base::in);
-        positions.open("../data/positions.txt", std::ios_base::in);
-
-        while (std::getline(positions, fen)) {
-            if (fen[0] == '\n') {
-                continue;
-            }
-            if (inputs == 50) {
-                break;
-            }
-            evals >> possibleEval;
-            if (possibleEval[0] == '#') {
-                continue;
-            }
-            eval = std::stoi(possibleEval);
-
-            Position position;
-            position.setFen(fen);
-            std::array<torch::Tensor, 2> halfkp = position.halfkp();
+        for (int i = 0; i < inputSplits.size(); i++) {
+            std::vector<std::array<torch::Tensor, 2>>& inputSplit = inputSplits[i];
             optimizer.zero_grad();
 
-            torch::Tensor output = model->forward(halfkp[0], halfkp[1]).cuda();
+            std::vector<float> outputs = model->batchForward(inputSplit);
             // std::cout << output << "\n" << eval << std::endl; 
-            std::vector<float> vec = {static_cast<float>(eval)};
+            std::vector<float> evals = outputSplits[i];
             // std::cout << torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda() << std::endl;
             // std::cout << output << std::endl;
 
-            torch::Tensor loss = lossFunction(output, torch::from_blob(vec.data(), {1}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
+            torch::Tensor loss = lossFunction(torch::from_blob(outputs.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)).cuda(),
+             torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
             loss.backward();
             torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
@@ -73,12 +97,13 @@ int main() {
 
             runningLoss += loss.item().to<double>();
             inputs += 1;
+            std::cout << runningLoss / inputs << std::endl;
+            std::cout << epoch << std::endl;
+            
         }
-        std::cout << runningLoss / inputs << std::endl;
-        std::cout << epoch << std::endl;
-        evals.close();
-        positions.close();  
     }
+    evals.close();
+    positions.close();
 
     model->eval();
     Position position;
@@ -96,6 +121,5 @@ int main() {
     torch::load(module, "model.pt");
     output = module->forward(halfkp[0], halfkp[1]).cuda();
     std::cout << output << std::endl;
-
     return 0;
 }

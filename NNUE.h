@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ATen/core/TensorBody.h>
 #include <torch/nn/module.h>
 #include <torch/nn/modules/activation.h>
 #include <torch/nn/modules/linear.h>
@@ -10,6 +11,7 @@ class NNUEImpl : public torch::nn::Module {
         NNUEImpl();
 
         torch::Tensor forward(torch::Tensor& half1, torch::Tensor& half2);
+        std::vector<float> batchForward(std::vector<std::array<torch::Tensor, 2>>& split);
     private:
         torch::nn::Linear input = torch::nn::Linear(40960, 256);
         torch::nn::ReLU clippedRelu = torch::nn::ReLU();

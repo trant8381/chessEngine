@@ -2,6 +2,7 @@
 #include <ATen/core/TensorBody.h>
 #include <torch/nn/utils/clip_grad.h>
 #include <torch/torch.h>
+#include <vector>
 
 NNUEImpl::NNUEImpl() {
     register_module("input", input);
@@ -19,3 +20,20 @@ torch::Tensor NNUEImpl::forward(torch::Tensor& half1, torch::Tensor& half2) {
     
     return output->forward(activation2->forward(hiddenLayer2->forward(activation1->forward(hiddenLayer1->forward(transformed)))));
 }
+
+std::vector<float> NNUEImpl::batchForward(std::vector<std::array<torch::Tensor, 2>>& split) {
+    std::vector<float> outputs;
+    for (std::array<torch::Tensor, 2>& halfkp : split) {
+        torch::Tensor transformed = torch::concat({input->forward(clippedRelu->forward(halfkp[0])),
+                                                input->forward(clippedRelu->forward(halfkp[1]))});
+        
+        outputs.push_back(output->forward(
+                            activation2->forward(
+                                hiddenLayer2->forward(
+                                    activation1->forward(
+                                        hiddenLayer1->forward(transformed)))))[0].item().to<float>());
+    }
+
+    return outputs;
+}
+

@@ -4,7 +4,7 @@ import chess.engine
 from sys import stdout
 pgn = open("./data/games.pgn")
 engine = chess.engine.SimpleEngine.popen_uci("./stockfish")
-games = 1000
+games = 4000
 
 with open("./data/positions.txt", 'a+') as moves:
     with open("./data/evals.txt", 'a+') as evals:
@@ -15,11 +15,10 @@ with open("./data/positions.txt", 'a+') as moves:
             for move in game.mainline_moves():
                 board.push(move)
                 info = engine.analyse(board, chess.engine.Limit(time=0.001))
+                if (str(info["score"].relative)[0] == "#"):
+                    continue
                 evals.write(str(info["score"].relative) + " ")
                 moves.write(board.fen() + "\n")
-
-            evals.write("\n")
-            moves.write("\n")
 
             if gameNum == games:
                 break
