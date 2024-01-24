@@ -25,8 +25,8 @@ torch::Tensor NNUEImpl::forward(torch::Tensor& half1, torch::Tensor& half2) {
     torch::Tensor half2Input = input1(half2);
     std::cout << half1Input.size(0) << std::endl;
     std::cout << half1Input.size(1) << std::endl;
-    torch::Tensor transformed = torch::concat({half1Input,
-                                               half2Input});
+    torch::Tensor transformed = torch::cat({half1Input,
+                                               half2Input}, 1);
     std::cout << "here" << std::endl;
     std::cout << transformed.size(0) << std::endl;
     std::cout << transformed.size(1) << std::endl;
