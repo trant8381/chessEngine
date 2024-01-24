@@ -74,8 +74,8 @@ int main() {
         runningLoss = 0;
         for (auto& batch : *dataloader) {
             torch::Tensor outputs = model(batch.data, batch.mask).cuda();
-            // std::cout << output << "\n" << eval << std::endl; 
-
+            std::cout << outputs << std::endl; 
+            std::cout << batch.target << std::endl;
             torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
             loss.backward();
             torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
