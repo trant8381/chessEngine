@@ -73,7 +73,7 @@ int main() {
     for (int epoch = 0; epoch < 20; epoch++) {
         runningLoss = 0;
         for (auto& batch : *dataloader) {
-            torch::Tensor outputs = model(batch.data, batch.mask).cuda();
+            torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
             std::cout << outputs << std::endl; 
             std::cout << batch.target << std::endl;
             torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
