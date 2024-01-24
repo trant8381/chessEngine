@@ -2,6 +2,7 @@
 // trains a NNUE model
 #include <ATen/core/TensorBody.h>
 #include <ATen/ops/requires_grad_ops.h>
+#include <ATen/ops/tensor_split.h>
 #include <c10/core/DeviceType.h>
 #include <c10/core/ScalarType.h>
 #include <cstdio>
@@ -37,9 +38,12 @@ int main() {
     
     double runningLoss = 0;
     double lastLoss = 0;
-    std::vector<torch::Tensor> half1Data;
-    std::vector<torch::Tensor> half2Data;
-    std::vector<float> outputData;
+    std::vector<torch::Tensor> trainHalf1Data;
+    std::vector<torch::Tensor> trainHalf2Data;
+    std::vector<torch::Tensor> testHalf1Data;
+    std::vector<torch::Tensor> testHalf2Data;
+    std::vector<float> trainOutputData;
+    std::vector<float> testOutputData;
     model->train();
 
     std::ifstream positions;
@@ -49,31 +53,39 @@ int main() {
 
     int inputs = 0;
     while (std::getline(positions, fen)) {
-        if (fen[0] == '\n') {
-            continue;
-        }
-        if (inputs == 32000) {
-            break;
-        }
-        evals >> eval;
-
         Position position;
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
-        float output = static_cast<float>(eval);
-        half1Data.push_back(halfkp[0]);
-        half2Data.push_back(halfkp[1]);
-        outputData.push_back(output);
 
-        inputs += 1;
+        if (inputs > 32000) {
+            if (inputs == 37000) {
+                break;
+            }
+            testHalf1Data.push_back(halfkp[0]);
+            testHalf2Data.push_back(halfkp[1]);
+            inputs += 1;
+        } else {
+            evals >> eval;
+
+            
+            float output = static_cast<float>(eval);
+            trainHalf1Data.push_back(halfkp[0]);
+            trainHalf2Data.push_back(halfkp[1]);
+            trainOutputData.push_back(output);
+            testOutputData.push_back(output);
+            inputs += 1;
+        }
     }
-    auto dataset = CustomDataset(half1Data, outputData, half2Data).map(Stack<Example3>());
-    auto dataloader = torch::data::make_data_loader(dataset, 64);
+
+    auto trainDataset = CustomDataset(trainHalf1Data, trainOutputData, trainHalf2Data).map(Stack<Example3>());
+    auto testDataset = CustomDataset(testHalf1Data, testOutputData, testHalf2Data).map(Stack<Example3>());
+    auto trainDataloader = torch::data::make_data_loader(trainDataset, 64);
+    auto testDataloader = torch::data::make_data_loader(testDataset, 64);
 
     for (int epoch = 0; epoch < 20; epoch++) {
         runningLoss = 0;
         inputs = 0;
-        for (auto& batch : *dataloader) {
+        for (auto& batch : *trainDataloader) {
             optimizer.zero_grad();
 
             torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
@@ -85,7 +97,20 @@ int main() {
             runningLoss += loss.item().to<double>();
             inputs += 1;            
         }
-        std::cout << runningLoss / inputs << std::endl;
+        std::cout << "Train loss: " << std::sqrt(runningLoss / inputs) << std::endl;
+        runningLoss = 0;
+        inputs = 0;
+        for (auto& batch : *testDataloader) {
+            optimizer.zero_grad();
+    
+            torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
+            torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
+
+            runningLoss += loss.item().to<double>();
+            inputs += 1;            
+        }
+
+        std::cout << "Test loss: " << std::sqrt(runningLoss / inputs) << std::endl;
     }
     evals.close();
     positions.close();
