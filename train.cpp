@@ -57,8 +57,8 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
 
-        if (inputs > 300000) {
-            if (inputs == 320000) {
+        if (inputs > 30000) {
+            if (inputs == 32000) {
                 break;
             }
             testHalf1Data.push_back(halfkp[0]);
@@ -101,8 +101,6 @@ int main() {
         runningLoss = 0;
         inputs = 0;
         for (auto& batch : *testDataloader) {
-            optimizer.zero_grad();
-
             torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
             torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
 
