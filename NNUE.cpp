@@ -17,10 +17,6 @@ NNUEImpl::NNUEImpl() {
 }
 
 torch::Tensor NNUEImpl::forward(torch::Tensor& half1, torch::Tensor& half2) {
-    std::cout << half1.size(0) << std::endl;
-    std::cout << half1.size(1) << std::endl;
-    std::cout << half2.size(0) << std::endl;
-    std::cout << half2.size(1) << std::endl;
     torch::Tensor half1Input = clippedRelu1(input1(half1));
     torch::Tensor half2Input = clippedRelu1(input1(half2));
     torch::Tensor transformed = torch::cat({half1Input,
