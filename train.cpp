@@ -58,7 +58,7 @@ int main() {
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
 
         if (inputs > 30000) {
-            if (inputs == 33000) {
+            if (inputs == 30002) {
                 break;
             }
             testHalf1Data.push_back(halfkp[0]);
@@ -102,10 +102,8 @@ int main() {
         inputs = 0;
         for (auto& batch : *testDataloader) {
             torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
-            torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
-
-            runningLoss += loss.item().to<double>();
-            inputs += 1;            
+            std::cout << outputs << std::endl;
+            std::cout << batch.target << std::endl;
         }
 
         std::cout << "Test loss: " << std::sqrt(runningLoss / inputs) << std::endl;
@@ -114,15 +112,15 @@ int main() {
     positions.close();
 
     model->eval();
-    Position position;
-    position.setFen("3r2k1/5p2/p3p1p1/1P3q1p/2p3nP/5BP1/1P2QPK1/1R6 b - - 0 32");
-    std::array<torch::Tensor, 2> halfkp = position.halfkp();
-    torch::Tensor output = model(halfkp[0].unsqueeze_(0), halfkp[1].unsqueeze_(0)).cuda();
-    std::cout << output << std::endl;
-    position.setFen("r3kbnr/pp3ppp/2n5/2pqN3/3Pp3/2P5/PP2bPPP/RNBQ1RK1 w kq - 0 9");
-    halfkp = position.halfkp();
-    output = model->forward(halfkp[0].unsqueeze_(0), halfkp[1].unsqueeze_(0)).cuda();
-    std::cout << output << std::endl;
+    // Position position;
+    // position.setFen("3r2k1/5p2/p3p1p1/1P3q1p/2p3nP/5BP1/1P2QPK1/1R6 b - - 0 32");
+    // std::array<torch::Tensor, 2> halfkp = position.halfkp();
+    // torch::Tensor output = model(halfkp[0].unsqueeze_(0), halfkp[1].unsqueeze_(0)).cuda();
+    // std::cout << output << std::endl;
+    // position.setFen("r3kbnr/pp3ppp/2n5/2pqN3/3Pp3/2P5/PP2bPPP/RNBQ1RK1 w kq - 0 9");
+    // halfkp = position.halfkp();
+    // output = model->forward(halfkp[0].unsqueeze_(0), halfkp[1].unsqueeze_(0)).cuda();
+    // std::cout << output << std::endl;
     torch::save(model, "model.pt");
 
     // NNUE module;
