@@ -61,8 +61,8 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
         float output = static_cast<float>(eval);
-        half1Data.push_back(std::move(halfkp[0]));
-        half2Data.push_back(std::move(halfkp[1]));
+        half1Data.push_back(std::move(halfkp[0].cuda()));
+        half2Data.push_back(std::move(halfkp[1].cuda()));
         outputData.push_back(output);
 
         inputs += 1;
