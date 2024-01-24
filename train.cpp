@@ -57,8 +57,8 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
 
-        if (inputs > 30000) {
-            if (inputs == 30002) {
+        if (inputs > 100000) {
+            if (inputs == 100005) {
                 break;
             }
             testHalf1Data.push_back(halfkp[0]);
