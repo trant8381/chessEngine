@@ -50,6 +50,6 @@ public:
     }
 
     Example3 get(size_t index) override {
-        return { half1[index], evals[index], evals[index] };
+        return { half1[index], evals[index], half2[index] };
     }
 };
