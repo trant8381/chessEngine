@@ -8,6 +8,7 @@
 #include <fstream>
 #include <ios>
 #include <string>
+#include <torch/data/dataloader.h>
 #include <torch/data/datasets/base.h>
 #include <torch/data/datasets/tensor.h>
 #include <torch/nn/modules/loss.h>
@@ -35,8 +36,9 @@ int main() {
     
     double runningLoss = 0;
     double lastLoss = 0;
-    std::vector<std::array<torch::Tensor, 2>> inputDataset;
-    std::vector<float> outputDataset;
+    std::vector<torch::Tensor> half1Data;
+    std::vector<torch::Tensor> half2Data;
+    std::vector<float> outputData;
     model->train();
 
     std::ifstream positions;
@@ -58,60 +60,39 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
         float output = static_cast<float>(eval);
-        std::array<torch::Tensor, 2> data = {std::move(halfkp[0]), std::move(halfkp[1])};
-        inputDataset.push_back(data);
-        outputDataset.push_back(output);
+        half1Data.push_back(std::move(halfkp[0]));
+        half2Data.push_back(std::move(halfkp[1]));
+        outputData.push_back(output);
 
         inputs += 1;
     }
-
-    int datasetSize = inputDataset.size();
-    int batchSize = 64;
-    std::vector<std::vector<torch::Tensor>> half1Split;
-    std::vector<std::vector<torch::Tensor>> half2Split;
-    std::vector<std::vector<float>> outputSplits;
-
-    for (int i = 0; i < datasetSize; i++) {
-        if (i % batchSize == 0) {
-            half1Split.push_back({});
-            half2Split.push_back({});
-            outputSplits.push_back({});
-        }
-        half1Split[i / batchSize].push_back(inputDataset[i][0]);
-        half2Split[i / batchSize].push_back(inputDataset[i][1]);
-        outputSplits[i / batchSize].push_back(outputDataset[i]);
-    }
+    torch::data::datasets::TensorDataset dataset = torch::data::datasets::TensorDataset(
+        {torch::stack(half1Data), torch::stack(half2Data), torch::from_blob(outputData.data(), {static_cast<long>(outputData.size())}, torch::TensorOptions().dtype(torch::kFloat)) }
+    );
+    auto dataloader = torch::data::make_data_loader(dataset, 64);
 
     for (int epoch = 0; epoch < 20; epoch++) {
         runningLoss = 0;
-        for (int i = 0; i < outputSplits.size(); i++) {
-            std::vector<torch::Tensor>& half1 = half1Split[i];
-            std::vector<torch::Tensor>& half2 = half2Split[i];
-            torch::Tensor half1batch = torch::stack(half1);
-            torch::Tensor half2batch = torch::stack(half2);
-            optimizer.zero_grad();
-            std::cout << half1batch.size(0) << std::endl;
-            std::cout << half1batch.size(1) << std::endl;
-            std::cout << half2batch.size(0) << std::endl;
-            std::cout << half2batch.size(1) << std::endl;
-            torch::Tensor outputs = model(half1batch, half2batch).cuda();
-            // std::cout << output << "\n" << eval << std::endl; 
-            std::vector<float> evals = outputSplits[i];
-            std::cout << outputs << std::endl;
-            // std::cout << output << std::endl;
-            std::cout << torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)) << std::endl;
+        for (auto& batch : *dataloader) {
+            std::cout << batch << std::endl;
+            // torch::Tensor outputs = model(half1batch, half2batch).cuda();
+            // // std::cout << output << "\n" << eval << std::endl; 
+            // std::vector<float> evals = outputSplits[i];
+            // std::cout << outputs << std::endl;
+            // // std::cout << output << std::endl;
+            // std::cout << torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)) << std::endl;
 
-            torch::Tensor loss = lossFunction(outputs,
-             torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
+            // torch::Tensor loss = lossFunction(outputs,
+            //  torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
 
-            loss.backward();
-            torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
-            optimizer.step();
+            // loss.backward();
+            // torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
+            // optimizer.step();
 
-            runningLoss += loss.item().to<double>();
-            inputs += 1;
-            std::cout << runningLoss / inputs << std::endl;
-            std::cout << epoch << std::endl;
+            // runningLoss += loss.item().to<double>();
+            // inputs += 1;
+            // std::cout << runningLoss / inputs << std::endl;
+            // std::cout << epoch << std::endl;
             
         }
     }
