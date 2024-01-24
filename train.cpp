@@ -33,7 +33,7 @@ int main() {
     NNUE model = NNUE();
     model->to(device);
 
-    torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.01);
+    torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.001);
     torch::nn::MSELoss lossFunction = torch::nn::MSELoss();
     
     double runningLoss = 0;
@@ -57,8 +57,8 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
 
-        if (inputs > 32000) {
-            if (inputs == 37000) {
+        if (inputs > 300000) {
+            if (inputs == 320000) {
                 break;
             }
             testHalf1Data.push_back(halfkp[0]);
@@ -102,7 +102,7 @@ int main() {
         inputs = 0;
         for (auto& batch : *testDataloader) {
             optimizer.zero_grad();
-    
+
             torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
             torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
 
