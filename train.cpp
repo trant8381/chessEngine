@@ -57,8 +57,8 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
 
-        if (inputs > 300000) {
-            if (inputs == 320000) {
+        if (inputs > 30000) {
+            if (inputs == 33000) {
                 break;
             }
             testHalf1Data.push_back(halfkp[0]);
@@ -79,10 +79,10 @@ int main() {
 
     auto trainDataset = CustomDataset(trainHalf1Data, trainOutputData, trainHalf2Data).map(Stack<Example3>());
     auto testDataset = CustomDataset(testHalf1Data, testOutputData, testHalf2Data).map(Stack<Example3>());
-    auto trainDataloader = torch::data::make_data_loader(trainDataset, 256);
-    auto testDataloader = torch::data::make_data_loader(testDataset, 256);
+    auto trainDataloader = torch::data::make_data_loader(trainDataset, 64);
+    auto testDataloader = torch::data::make_data_loader(testDataset, 64);
 
-    for (int epoch = 0; epoch < 100; epoch++) {
+    for (int epoch = 0; epoch < 10; epoch++) {
         runningLoss = 0;
         inputs = 0;
         for (auto& batch : *trainDataloader) {
@@ -113,17 +113,17 @@ int main() {
     evals.close();
     positions.close();
 
-    // model->eval();
-    // Position position;
-    // position.setFen("3r2k1/5p2/p3p1p1/1P3q1p/2p3nP/5BP1/1P2QPK1/1R6 b - - 0 32");
-    // std::array<torch::Tensor, 2> halfkp = position.halfkp();
-    // torch::Tensor output = model(halfkp[0], halfkp[1]).cuda();
-    // std::cout << output << std::endl;
-    // position.setFen("r3kbnr/pp3ppp/2n5/2pqN3/3Pp3/2P5/PP2bPPP/RNBQ1RK1 w kq - 0 9");
-    // halfkp = position.halfkp();
-    // output = model->forward(halfkp[0], halfkp[1]).cuda();
-    // std::cout << output << std::endl;
-    // torch::save(model, "model.pt");
+    model->eval();
+    Position position;
+    position.setFen("3r2k1/5p2/p3p1p1/1P3q1p/2p3nP/5BP1/1P2QPK1/1R6 b - - 0 32");
+    std::array<torch::Tensor, 2> halfkp = position.halfkp();
+    torch::Tensor output = model(halfkp[0], halfkp[1]).cuda();
+    std::cout << output << std::endl;
+    position.setFen("r3kbnr/pp3ppp/2n5/2pqN3/3Pp3/2P5/PP2bPPP/RNBQ1RK1 w kq - 0 9");
+    halfkp = position.halfkp();
+    output = model->forward(halfkp[0], halfkp[1]).cuda();
+    std::cout << output << std::endl;
+    torch::save(model, "model.pt");
 
     // NNUE module;
     // torch::load(module, "model.pt");
