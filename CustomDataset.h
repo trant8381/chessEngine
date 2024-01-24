@@ -27,7 +27,7 @@ struct Stack : public torch::data::transforms::Collation<ExampleType> {
     for (auto &example : examples) {
       xs.push_back(std::move(example.data));
       ys.push_back(std::move(example.target));
-      masks.push_back(std::move(std::get<0>(example.mask)));
+      masks.push_back(std::move(example.mask));
     }
     return {torch::stack(xs), torch::stack(ys), torch::stack(masks)};
   }
