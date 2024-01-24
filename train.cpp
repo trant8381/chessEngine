@@ -81,6 +81,7 @@ int main() {
             std::cout << std::endl;
             // std::cout << batch.target << std::endl;
             torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
+            std::cout << "loss" << std::endl;
             loss.backward();
             torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
             optimizer.step();
