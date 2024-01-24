@@ -73,8 +73,6 @@ int main() {
     for (int epoch = 0; epoch < 20; epoch++) {
         runningLoss = 0;
         for (auto& batch : *dataloader) {
-            std::cout << batch.mask << std::endl;
-            std::cout << batch.target << std::endl;
             torch::Tensor outputs = model(batch.data, batch.mask).cuda();
             // std::cout << output << "\n" << eval << std::endl; 
 
