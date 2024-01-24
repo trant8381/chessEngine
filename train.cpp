@@ -61,8 +61,8 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
         float output = static_cast<float>(eval);
-        half1Data.push_back(std::move(halfkp[0].cuda()));
-        half2Data.push_back(std::move(halfkp[1].cuda()));
+        half1Data.push_back(halfkp[0].cuda());
+        half2Data.push_back(halfkp[1].cuda());
         outputData.push_back(output);
 
         inputs += 1;
@@ -77,7 +77,7 @@ int main() {
             torch::Tensor outputs = model(batch.data, batch.mask).cuda();
             // std::cout << output << "\n" << eval << std::endl; 
 
-            torch::Tensor loss = lossFunction(outputs, batch.target);
+            torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
             loss.backward();
             torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
             optimizer.step();
