@@ -17,6 +17,7 @@
 #include <ostream>
 #include "Position.h"
 #include "NNUE.h"
+#include "CustomDataset.h"
 
 int main() {
     torch::Device device = torch::kCPU;
@@ -66,33 +67,25 @@ int main() {
 
         inputs += 1;
     }
-    torch::data::datasets::TensorDataset dataset = torch::data::datasets::TensorDataset(
-        {torch::stack(half1Data), torch::stack(half2Data), torch::from_blob(outputData.data(), {static_cast<long>(outputData.size())}, torch::TensorOptions().dtype(torch::kFloat)) }
-    );
+    auto dataset = CustomDataset(half1Data, half2Data, outputData).map(Stack<Example3>());
     auto dataloader = torch::data::make_data_loader(dataset, 64);
 
     for (int epoch = 0; epoch < 20; epoch++) {
         runningLoss = 0;
         for (auto& batch : *dataloader) {
-            std::cout << batch << std::endl;
-            // torch::Tensor outputs = model(half1batch, half2batch).cuda();
-            // // std::cout << output << "\n" << eval << std::endl; 
-            // std::vector<float> evals = outputSplits[i];
-            // std::cout << outputs << std::endl;
-            // // std::cout << output << std::endl;
-            // std::cout << torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)) << std::endl;
+            std::cout << batch.data << std::endl;
+            torch::Tensor outputs = model(batch.data, batch.mask).cuda();
+            // std::cout << output << "\n" << eval << std::endl; 
 
-            // torch::Tensor loss = lossFunction(outputs,
-            //  torch::from_blob(evals.data(), {static_cast<long>(evals.size())}, torch::TensorOptions().dtype(torch::kFloat)).cuda()).cuda();
+            torch::Tensor loss = lossFunction(outputs, batch.target);
+            loss.backward();
+            torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
+            optimizer.step();
 
-            // loss.backward();
-            // torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
-            // optimizer.step();
-
-            // runningLoss += loss.item().to<double>();
-            // inputs += 1;
-            // std::cout << runningLoss / inputs << std::endl;
-            // std::cout << epoch << std::endl;
+            runningLoss += loss.item().to<double>();
+            inputs += 1;
+            std::cout << runningLoss / inputs << std::endl;
+            std::cout << epoch << std::endl;
             
         }
     }
