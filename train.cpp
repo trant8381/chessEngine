@@ -72,6 +72,7 @@ int main() {
 
     for (int epoch = 0; epoch < 20; epoch++) {
         runningLoss = 0;
+        inputs = 0;
         for (auto& batch : *dataloader) {
             optimizer.zero_grad();
 
@@ -85,11 +86,9 @@ int main() {
             
             runningLoss += loss.item().to<double>();
             
-            inputs += 1;
-            // std::cout << runningLoss / inputs << std::endl;
-            // std::cout << epoch << std::endl;
-            
+            inputs += 1;            
         }
+        std::cout << runningLoss / inputs << std::endl;
     }
     evals.close();
     positions.close();
