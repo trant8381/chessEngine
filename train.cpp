@@ -33,7 +33,7 @@ int main() {
     NNUE model = NNUE();
     model->to(device);
 
-    torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.001);
+    torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.0001);
     torch::nn::MSELoss lossFunction = torch::nn::MSELoss();
     
     double runningLoss = 0;
@@ -57,8 +57,8 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
 
-        if (inputs > 30000) {
-            if (inputs == 32000) {
+        if (inputs > 300000) {
+            if (inputs == 320000) {
                 break;
             }
             testHalf1Data.push_back(halfkp[0]);
@@ -79,10 +79,10 @@ int main() {
 
     auto trainDataset = CustomDataset(trainHalf1Data, trainOutputData, trainHalf2Data).map(Stack<Example3>());
     auto testDataset = CustomDataset(testHalf1Data, testOutputData, testHalf2Data).map(Stack<Example3>());
-    auto trainDataloader = torch::data::make_data_loader(trainDataset, 64);
-    auto testDataloader = torch::data::make_data_loader(testDataset, 64);
+    auto trainDataloader = torch::data::make_data_loader(trainDataset, 256);
+    auto testDataloader = torch::data::make_data_loader(testDataset, 256);
 
-    for (int epoch = 0; epoch < 20; epoch++) {
+    for (int epoch = 0; epoch < 100; epoch++) {
         runningLoss = 0;
         inputs = 0;
         for (auto& batch : *trainDataloader) {
