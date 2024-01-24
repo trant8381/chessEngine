@@ -99,7 +99,7 @@ int main() {
         }
         std::cout << "Train loss: " << std::sqrt(runningLoss / inputs) << std::endl;
         runningLoss = 0;
-        inputs = 0;
+        inputs = 1;
         for (auto& batch : *testDataloader) {
             torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
             std::cout << outputs << std::endl;
