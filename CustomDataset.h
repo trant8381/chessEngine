@@ -46,7 +46,7 @@ public:
     }
 
     torch::optional<size_t> size() const override {
-        return 10;
+        return half1.size(0);
     }
 
     Example3 get(size_t index) override {
