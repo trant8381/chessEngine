@@ -33,7 +33,7 @@ int main() {
     NNUE model = NNUE();
     model->to(device);
 
-    torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.0001);
+    torch::optim::Adam optimizer = torch::optim::Adam(model->parameters(), 0.001);
     torch::nn::MSELoss lossFunction = torch::nn::MSELoss();
     
     double runningLoss = 0;
@@ -82,7 +82,7 @@ int main() {
     auto trainDataloader = torch::data::make_data_loader(trainDataset, 64);
     auto testDataloader = torch::data::make_data_loader(testDataset, 64);
 
-    for (int epoch = 0; epoch < 10; epoch++) {
+    for (int epoch = 0; epoch < 20; epoch++) {
         runningLoss = 0;
         inputs = 0;
         for (auto& batch : *trainDataloader) {
