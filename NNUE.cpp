@@ -25,6 +25,9 @@ torch::Tensor NNUEImpl::forward(torch::Tensor& half1, torch::Tensor& half2) {
     torch::Tensor transformed = torch::concat({clippedRelu1(input1(half1)),
                                                clippedRelu2(input2(half2))});
     std::cout << "here" << std::endl;
+    std::cout << transformed.size(0) << std::endl;
+    std::cout << transformed.size(1) << std::endl;
+    std::cout << transformed.size(2) << std::endl;
     return output(activation2(hiddenLayer2(activation1(hiddenLayer1(transformed)))));
 }
 
