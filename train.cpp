@@ -67,13 +67,14 @@ int main() {
 
         inputs += 1;
     }
-    auto dataset = CustomDataset(half1Data, half2Data, outputData).map(Stack<Example3>());
+    auto dataset = CustomDataset(half1Data, outputData, half2Data).map(Stack<Example3>());
     auto dataloader = torch::data::make_data_loader(dataset, 64);
 
     for (int epoch = 0; epoch < 20; epoch++) {
         runningLoss = 0;
         for (auto& batch : *dataloader) {
             std::cout << batch.mask << std::endl;
+            std::cout << batch.target << std::endl;
             torch::Tensor outputs = model(batch.data, batch.mask).cuda();
             // std::cout << output << "\n" << eval << std::endl; 
 

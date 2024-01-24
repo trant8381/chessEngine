@@ -39,7 +39,7 @@ public:
     torch::Tensor half1;
     torch::Tensor half2;
     torch::Tensor evals;
-    CustomDataset(std::vector<torch::Tensor> _half1, std::vector<torch::Tensor> _half2, std::vector<float> _evals) {
+    CustomDataset(std::vector<torch::Tensor> _half1, std::vector<float> _evals, std::vector<torch::Tensor> _half2) {
         half1 = torch::stack(_half1).cuda();
         half2 = torch::stack(_half2).cuda();
         evals = torch::from_blob(_evals.data(), {static_cast<long>(_evals.size())}, torch::TensorOptions().dtype(torch::kFloat)).cuda();
