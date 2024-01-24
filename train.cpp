@@ -52,7 +52,7 @@ int main() {
         if (fen[0] == '\n') {
             continue;
         }
-        if (inputs == 256) {
+        if (inputs == 32000) {
             break;
         }
         evals >> eval;
@@ -81,11 +81,8 @@ int main() {
             loss.backward();
             
             torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
-            
             optimizer.step();
-            
             runningLoss += loss.item().to<double>();
-            
             inputs += 1;            
         }
         std::cout << runningLoss / inputs << std::endl;
