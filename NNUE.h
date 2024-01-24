@@ -14,7 +14,8 @@ class NNUEImpl : public torch::nn::Module {
         std::vector<float> batchForward(std::vector<std::array<torch::Tensor, 2>>& split);
     private:
         torch::nn::Linear input = torch::nn::Linear(40960, 256);
-        torch::nn::ReLU clippedRelu = torch::nn::ReLU();
+        torch::nn::ReLU clippedRelu1 = torch::nn::ReLU();
+        torch::nn::ReLU clippedRelu2 = torch::nn::ReLU();
         
         torch::nn::Linear hiddenLayer1 = torch::nn::Linear(512, 32);
         torch::nn::Linear hiddenLayer2 = torch::nn::Linear(32, 32);

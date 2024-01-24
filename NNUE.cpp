@@ -6,7 +6,8 @@
 
 NNUEImpl::NNUEImpl() {
     register_module("input", input);
-    register_module("clippedRelu", clippedRelu);
+    register_module("clippedRelu1", clippedRelu1);
+    register_module("clippedRelu2", clippedRelu2);
     register_module("hiddenLayer1", hiddenLayer1);
     register_module("hiddenLayer2", hiddenLayer2);
     register_module("activation1", activation1);
@@ -19,8 +20,8 @@ torch::Tensor NNUEImpl::forward(torch::Tensor& half1, torch::Tensor& half2) {
     std::cout << half1.size(1) << std::endl;
     std::cout << half2.size(0) << std::endl;
     std::cout << half2.size(1) << std::endl;
-    torch::Tensor transformed = torch::concat({input->forward(clippedRelu->forward(half1)),
-                                               input->forward(clippedRelu->forward(half2))});
+    torch::Tensor transformed = torch::concat({input->forward(clippedRelu1->forward(half1)),
+                                               input->forward(clippedRelu2->forward(half2))});
     
     return output->forward(activation2->forward(hiddenLayer2->forward(activation1->forward(hiddenLayer1->forward(transformed)))));
 }
@@ -28,8 +29,8 @@ torch::Tensor NNUEImpl::forward(torch::Tensor& half1, torch::Tensor& half2) {
 std::vector<float> NNUEImpl::batchForward(std::vector<std::array<torch::Tensor, 2>>& split) {
     std::vector<float> outputs;
     for (std::array<torch::Tensor, 2>& halfkp : split) {
-        torch::Tensor transformed = torch::concat({input->forward(clippedRelu->forward(halfkp[0])),
-                                                input->forward(clippedRelu->forward(halfkp[1]))});
+        torch::Tensor transformed = torch::concat({input->forward(clippedRelu1->forward(halfkp[0])),
+                                                input->forward(clippedRelu2->forward(halfkp[1]))});
         
         outputs.push_back(output->forward(
                             activation2->forward(
