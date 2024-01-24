@@ -83,9 +83,11 @@ int main() {
             torch::Tensor loss = lossFunction(outputs, batch.target).cuda();
             std::cout << "loss" << std::endl;
             loss.backward();
+            std::cout << "backward" << std::endl;
             torch::nn::utils::clip_grad_norm_(model->parameters(), 1);
+            std::cout << "clip" << std::endl;
             optimizer.step();
-
+            std::cout << "step" << std::endl;
             runningLoss += loss.item().to<double>();
             inputs += 1;
             // std::cout << runningLoss / inputs << std::endl;
