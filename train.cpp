@@ -89,6 +89,7 @@ int main() {
             optimizer.step();
             std::cout << "step" << std::endl;
             runningLoss += loss.item().to<double>();
+            std::cout << "to" << std::endl;
             inputs += 1;
             // std::cout << runningLoss / inputs << std::endl;
             // std::cout << epoch << std::endl;
