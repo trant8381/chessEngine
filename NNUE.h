@@ -13,10 +13,11 @@ class NNUEImpl : public torch::nn::Module {
         torch::Tensor forward(torch::Tensor& half1, torch::Tensor& half2);
         std::vector<float> batchForward(std::vector<std::array<torch::Tensor, 2>>& split);
     private:
-        torch::nn::Linear input = torch::nn::Linear(40960, 256);
+        torch::nn::Linear input1 = torch::nn::Linear(40960, 256);
+        torch::nn::Linear input2 = torch::nn::Linear(40960, 256);
         torch::nn::ReLU clippedRelu1 = torch::nn::ReLU();
         torch::nn::ReLU clippedRelu2 = torch::nn::ReLU();
-        
+
         torch::nn::Linear hiddenLayer1 = torch::nn::Linear(512, 32);
         torch::nn::Linear hiddenLayer2 = torch::nn::Linear(32, 32);
         torch::nn::ReLU activation1 = torch::nn::ReLU();
