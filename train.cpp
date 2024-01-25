@@ -58,7 +58,7 @@ int main() {
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
 
         if (inputs > 20000) {
-            if (inputs == 20005) {
+            if (inputs == 20012) {
                 break;
             }
             testHalf1Data.push_back(halfkp[0]);
@@ -66,7 +66,6 @@ int main() {
             inputs += 1;
         } else {
             evals >> eval;
-
             
             float output = static_cast<float>(eval);
             trainHalf1Data.push_back(halfkp[0]);
@@ -82,7 +81,9 @@ int main() {
     auto trainDataloader = torch::data::make_data_loader(trainDataset, 64);
     auto testDataloader = torch::data::make_data_loader(testDataset, 64);
 
-    for (int epoch = 0; epoch < 100; epoch++) {
+    for (int epoch = 0; epoch < 50; epoch++) {
+        std::cout << "Epoch: " << epoch << std::endl;
+
         runningLoss = 0;
         inputs = 0;
         for (auto& batch : *trainDataloader) {
@@ -98,15 +99,12 @@ int main() {
             inputs += 1;            
         }
         std::cout << "Train loss: " << std::sqrt(runningLoss / inputs) << std::endl;
-        runningLoss = 0;
-        inputs = 1;
+
         for (auto& batch : *testDataloader) {
             torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
-            std::cout << outputs << std::endl;
-            std::cout << batch.target << std::endl;
+            std::cout << torch::multiply(outputs, 10000) << std::endl;
+            std::cout << torch::multiply(batch.target, 10000) << std::endl;
         }
-
-        std::cout << "Test loss: " << std::sqrt(runningLoss / inputs) << std::endl;
     }
     evals.close();
     positions.close();
