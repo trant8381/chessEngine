@@ -43,7 +43,6 @@ public:
     int orient(bool& turn, int& square);
     int halfkpIndex(bool& turn, int king, int& piece, int& index);
     std::array<torch::Tensor, 2> halfkp();
-private:
     // intialize piece bitboards
     U64 whitePawns = 0x000000000000FF00;
     U64 blackPawns = 0x00FF000000000000;
