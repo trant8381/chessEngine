@@ -2,31 +2,31 @@
 #include "Position.h"
 #include "Types.h"
 
-int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist);
+int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model);
 
-int searchBlock(bool bSearchPv, int beta, int alpha, int depth, std::stack<Position> movelist) {
+inline int searchBlock(bool bSearchPv, int beta, int alpha, int depth, std::stack<Position> movelist, NNUE& model) {
 	int score = 0;
 	if (bSearchPv) {
-		score = -pvSearch(-beta, -alpha, depth - 1, movelist);
+		score = -pvSearch(-beta, -alpha, depth - 1, movelist, model);
 	} else {
-		score = -pvSearch(-alpha - 1, -alpha, depth - 1, movelist);
+		score = -pvSearch(-alpha - 1, -alpha, depth - 1, movelist, model);
 		if ( score > alpha ) {
-			score = -pvSearch(-beta, -alpha, depth - 1, movelist);
+			score = -pvSearch(-beta, -alpha, depth - 1, movelist, model);
 		}
 	}
 
 	return alpha;
 }
 
-int evaluate(std::stack<Position>& movelist, NNUE& model) {
+inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	std::array<torch::Tensor, 2> halfkp = movelist.top().halfkp();
-	torch::Tensor output = model(std::move(halfkp[0]), std::move(halfkp[1]));
-	int eval = output[0].item().to<int>()
+	torch::Tensor output = model->forward(halfkp[0], halfkp[1]);
+	int eval = output[0].item().to<int>();
 	
 	return eval;
 }
 
-int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model) {
+inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model) {
     if (depth == 0) {
         return evaluate(movelist, model);
     }
@@ -45,7 +45,7 @@ int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNU
 	int& normalSize = normalMoves.size;
 	for (int move = 0; move < normalSize; move++) {
 		movelist.push(position.makeNormalMove(normalMoves[move][0], normalMoves[move][1]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist);
+		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
@@ -61,7 +61,7 @@ int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNU
 	for (int move = 0; move < castleSize; move++) {
 		movelist.push(position.makeCastlingMove(castleMoves[move][0][0], castleMoves[move][0][1],
 						 		 				castleMoves[move][1][0], castleMoves[move][1][1]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist);
+		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
@@ -76,7 +76,7 @@ int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNU
 	int& enPassantSize = enPassantMoves.size;
 	for (int move = 0; move < enPassantSize; move++) {
 		movelist.push(position.makeEnPassantMove(enPassantMoves[move][0], enPassantMoves[move][1], enPassantMoves[move][2]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist);
+		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
@@ -91,7 +91,7 @@ int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNU
 	int& doubleMovesSize = doubleMoves.size;
 	for (int move = 0; move < doubleMovesSize; move++) {
 		movelist.push(position.makeDoubleMove(doubleMoves[move][0], doubleMoves[move][1], doubleMoves[move][2]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist);
+		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
@@ -106,7 +106,7 @@ int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNU
 	int& promotionSize = promotions.size;
 	for (int move = 0; move < promotionSize; move++) {
 		movelist.push(position.makePromotionMove(promotions[move][0], promotions[move][1], promotions[move][2]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist);
+		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;

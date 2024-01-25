@@ -1,2 +1,8 @@
 libtorch
 build
+.vscode
+chess-library
+data/games.pgn
+stockfish
+.cache
+Tests.cpp
