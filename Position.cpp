@@ -1160,6 +1160,7 @@ std::array<torch::Tensor, 2> Position::halfkp() {
 			if (index > 40959) {
 				std::cout << index << std::endl;
 				std::cout << "bad" << std::endl;
+				std::cout << king << std::endl;
 			} else if (index < 0) {
 				std::cout << "badneg" << std::endl;
 			}
