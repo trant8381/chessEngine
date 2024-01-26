@@ -22,7 +22,7 @@ int main() {
     std::stack<Position> movelist;
     movelist.push(startPosition);
     std::stack<Position> resMovelist = movelist;
-    std::cout << pvSearch(-1000000, 1000000, 10, movelist, model, resMovelist) << std::endl;
+    std::cout << pvSearch(-1000000, 1000000, 5, movelist, model, resMovelist) << std::endl;
     std::cout << resMovelist.top().toFen() << std::endl;
     return 0;
 }
