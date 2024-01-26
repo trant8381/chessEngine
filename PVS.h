@@ -1,5 +1,6 @@
 #include "NNUE.h"
 #include "Position.h"
+#include <torch/torch.h>
 #include "Types.h"
 
 int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model);
@@ -20,7 +21,7 @@ inline int searchBlock(bool bSearchPv, int beta, int alpha, int depth, std::stac
 
 inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	std::array<torch::Tensor, 2> halfkp = movelist.top().halfkp();
-	torch::Tensor output = model->forward(halfkp[0], halfkp[1]);
+	torch::Tensor output = model->forward(halfkp[0].unsqueeze_(0), halfkp[1].unsqueeze_(0));
 	std::cout << output << std::endl;
 	int eval = output.item().to<int>();	
 
