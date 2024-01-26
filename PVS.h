@@ -40,12 +40,7 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 }
 
 inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model, std::stack<Position>& resMovelist) {
-	Position best;
-    if (depth == 0) {
-        return evaluate(movelist, model);
-    }
-
-    bool bSearchPv = true;
+	bool bSearchPv = true;
 	int score = 0;
     Moveset moveset;
 	Position position = movelist.top();
@@ -60,6 +55,11 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	|| ((position.whiteKing | position.blackKing) == 0)) {
 		return -1000000;
 	}
+	
+	Position best;
+    if (depth == 0) {
+        return evaluate(movelist, model);
+    }
 
     Array<std::array<int, 2>, 218>& normalMoves = moveset.normal;
 	int& normalSize = normalMoves.size;
