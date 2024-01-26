@@ -126,6 +126,8 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 
 		movelist.pop();
 	}
+
 	resMovelist.push(best);
+	
 	return alpha;
 }
