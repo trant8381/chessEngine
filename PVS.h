@@ -28,7 +28,7 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 }
 
 inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model) {
-	std::cout << "here";
+	std::cout << "here" << std::endl;
     if (depth == 0) {
         return evaluate(movelist, model);
     }
