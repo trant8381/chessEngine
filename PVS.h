@@ -23,11 +23,12 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	torch::Tensor output = model->forward(halfkp[0], halfkp[1]);
 	std::cout << output << std::endl;
 	int eval = output.item().to<int>();	
-	
+
 	return eval;
 }
 
 inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model) {
+	std::cout << "here";
     if (depth == 0) {
         return evaluate(movelist, model);
     }
