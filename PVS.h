@@ -15,7 +15,6 @@ inline int searchBlock(bool bSearchPv, int beta, int alpha, int depth, std::stac
 			score = -pvSearch(-beta, -alpha, depth - 1, movelist, model);
 		}
 	}
-	std::cout << score << std::endl;
 	return score;
 }
 
@@ -23,7 +22,7 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	std::array<torch::Tensor, 2> halfkp = movelist.top().halfkp();
 	torch::Tensor output = model->forward(halfkp[0].to_dense().unsqueeze_(0), halfkp[1].to_dense().unsqueeze_(0));
 	int eval = output[0][0].item().to<int>();
-
+	std::cout << output << std::endl;
 	return eval;
 }
 
