@@ -22,14 +22,13 @@ inline int searchBlock(bool bSearchPv, int beta, int alpha, int depth, std::stac
 inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	std::array<torch::Tensor, 2> halfkp = movelist.top().halfkp();
 	torch::Tensor output = model->forward(halfkp[0].to_dense().unsqueeze_(0), halfkp[1].to_dense().unsqueeze_(0));
-	std::cout << output << std::endl;
+	std::cout << output[0] << std::endl;
 	int eval = output.item().to<int>();	
 
 	return eval;
 }
 
 inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model) {
-	// std::cout << "here" << std::endl;
     if (depth == 0) {
         return evaluate(movelist, model);
     }
@@ -39,23 +38,17 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
     Moveset moveset;
 	Position position = movelist.top();
 
-	// std::cout << "premoveset" << std::endl;
     if (position.isWhiteTurn) {
         position.whiteMoves(moveset);
     } else {
         position.blackMoves(moveset);
     }
 
-	// std::cout << "postmoveset" << std::endl;
-
     Array<std::array<int, 2>, 218>& normalMoves = moveset.normal;
 	int& normalSize = normalMoves.size;
 	for (int move = 0; move < normalSize; move++) {
-		// std::cout << "prenormalMoves" << std::endl;
 		movelist.push(position.makeNormalMove(normalMoves[move][0], normalMoves[move][1]));
-		// std::cout << "postnormalMoves" << std::endl;
 		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
-		// std::cout << "searchblock" << std::endl;
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
