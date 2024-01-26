@@ -5,7 +5,7 @@
 
 int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model, std::stack<Position>& resMovelist);
 
-inline int searchBlock(bool& bSearchPv, int& beta, int& alpha, int& depth, std::stack<Position> movelist, NNUE& model, std::stack<Position> resMovelist) {
+inline int searchBlock(bool& bSearchPv, int& beta, int& alpha, int& depth, std::stack<Position>& movelist, NNUE& model, std::stack<Position>& resMovelist) {
 	int score = 0;
 	if (bSearchPv) {
 		score = -pvSearch(-beta, -alpha, depth - 1, movelist, model, resMovelist);
@@ -22,19 +22,10 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	std::array<torch::Tensor, 2> halfkp = movelist.top().halfkp();
 
 	torch::Tensor denseHalf1 = halfkp[0].to_dense();
-	std::cout << "dense1" << std::endl;
 	torch::Tensor denseHalf2 = halfkp[1].to_dense();
-	std::cout << "dense2" << std::endl;
 	torch::Tensor half1 = denseHalf1.unsqueeze_(0);
-	std::cout << "half1" << std::endl;
 	torch::Tensor half2 = denseHalf2.unsqueeze_(0);
-	std::cout << "half2" << std::endl;
-	std::cout << half1.size(0) << std::endl;
-	std::cout << half2.size(0) << std::endl;
-	std::cout << half1.size(1) << std::endl;
-	std::cout << half2.size(1) << std::endl;
 	torch::Tensor output = model->forward(half1, half2);
-	std::cout << output << std::endl;
 	int eval = output[0][0].item().to<int>();
 	return eval;
 }
@@ -55,7 +46,7 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	|| ((position.whiteKing | position.blackKing) == 0)) {
 		return -1000000;
 	}
-	
+
 	Position best;
     if (depth == 0) {
         return evaluate(movelist, model);
