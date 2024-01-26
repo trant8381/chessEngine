@@ -1134,9 +1134,6 @@ int Position::halfkpIndex(bool& turn, int king, int& piece, int& index) {
 }
 
 std::array<torch::Tensor, 2> Position::halfkp() {
-	int whiteKingIndex = __builtin_ctzll(whiteKing);
-	int blackKingIndex = __builtin_ctzll(blackKing);
-	
 	Array<torch::Tensor, 2> res = Array<torch::Tensor, 2>(0, {});
 
 	for (bool turn : {isWhiteTurn, !isWhiteTurn}) {
@@ -1144,7 +1141,7 @@ std::array<torch::Tensor, 2> Position::halfkp() {
 		std::vector<int16_t> values;
 		int king = 0;
 
-		if (isWhiteTurn) {
+		if (turn) {
 			king = __builtin_ctzll(whiteKing);
 		} else {
 			king = __builtin_ctzll(blackKing);
