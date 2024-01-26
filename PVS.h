@@ -3,16 +3,16 @@
 #include <torch/torch.h>
 #include "Types.h"
 
-int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model);
+int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model, std::stack<Position>& resMovelist);
 
-inline int searchBlock(bool bSearchPv, int beta, int alpha, int depth, std::stack<Position> movelist, NNUE& model) {
+inline int searchBlock(bool& bSearchPv, int& beta, int& alpha, int& depth, std::stack<Position> movelist, NNUE& model, std::stack<Position> resMovelist) {
 	int score = 0;
 	if (bSearchPv) {
-		score = -pvSearch(-beta, -alpha, depth - 1, movelist, model);
+		score = -pvSearch(-beta, -alpha, depth - 1, movelist, model, resMovelist);
 	} else {
-		score = -pvSearch(-alpha - 1, -alpha, depth - 1, movelist, model);
+		score = -pvSearch(-alpha - 1, -alpha, depth - 1, movelist, model, resMovelist);
 		if ( score > alpha ) {
-			score = -pvSearch(-beta, -alpha, depth - 1, movelist, model);
+			score = -pvSearch(-beta, -alpha, depth - 1, movelist, model, resMovelist);
 		}
 	}
 	return score;
@@ -26,7 +26,8 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	return eval;
 }
 
-inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model) {
+inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model, std::stack<Position>& resMovelist) {
+	Position best;
     if (depth == 0) {
         return evaluate(movelist, model);
     }
@@ -46,15 +47,17 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	int& normalSize = normalMoves.size;
 	for (int move = 0; move < normalSize; move++) {
 		movelist.push(position.makeNormalMove(normalMoves[move][0], normalMoves[move][1]));
-		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
-		movelist.pop();
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model, resMovelist);
+		
 		if (score >= beta) {
 			return beta;
 		}
 		if (score > alpha) {
 			alpha = score;
+			best = movelist.top();
 			bSearchPv = false;
 		}
+		movelist.pop();
 	}
 
 	Array<std::array<std::array<int, 2>, 2>, 2>& castleMoves = moveset.castle;
@@ -62,61 +65,67 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	for (int move = 0; move < castleSize; move++) {
 		movelist.push(position.makeCastlingMove(castleMoves[move][0][0], castleMoves[move][0][1],
 						 		 				castleMoves[move][1][0], castleMoves[move][1][1]));
-		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
-		movelist.pop();
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model, resMovelist);
+		
 		if (score >= beta) {
 			return beta;
 		}
 		if (score > alpha) {
 			alpha = score;
+			best = movelist.top();
 			bSearchPv = false;
 		}
+		movelist.pop();
 	}
 
 	Array<std::array<int, 3>, 2>& enPassantMoves = moveset.enPassant;
 	int& enPassantSize = enPassantMoves.size;
 	for (int move = 0; move < enPassantSize; move++) {
 		movelist.push(position.makeEnPassantMove(enPassantMoves[move][0], enPassantMoves[move][1], enPassantMoves[move][2]));
-		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
-		movelist.pop();
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model, resMovelist);
 		if (score >= beta) {
 			return beta;
 		}
 		if (score > alpha) {
 			alpha = score;
+			best = movelist.top();
 			bSearchPv = false;
 		}
+		movelist.pop();
 	}
 
 	Array<std::array<int, 3>, 8>& doubleMoves = moveset.doubleMoves;
 	int& doubleMovesSize = doubleMoves.size;
 	for (int move = 0; move < doubleMovesSize; move++) {
 		movelist.push(position.makeDoubleMove(doubleMoves[move][0], doubleMoves[move][1], doubleMoves[move][2]));
-		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
-		movelist.pop();
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model, resMovelist);
 		if (score >= beta) {
 			return beta;
 		}
 		if (score > alpha) {
 			alpha = score;
+			best = movelist.top();
 			bSearchPv = false;
 		}
+		movelist.pop();
 	}
 
 	Array<std::array<int, 3>, 64>& promotions = moveset.promotion;
 	int& promotionSize = promotions.size;
 	for (int move = 0; move < promotionSize; move++) {
 		movelist.push(position.makePromotionMove(promotions[move][0], promotions[move][1], promotions[move][2]));
-		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
-		movelist.pop();
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model, resMovelist);
 		if (score >= beta) {
 			return beta;
 		}
 		if (score > alpha) {
 			alpha = score;
+			best = movelist.top();
 			bSearchPv = false;
 		}
-	}
 
+		movelist.pop();
+	}
+	resMovelist.push(best);
 	return alpha;
 }
