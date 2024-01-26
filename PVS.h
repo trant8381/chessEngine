@@ -22,14 +22,14 @@ inline int searchBlock(bool bSearchPv, int beta, int alpha, int depth, std::stac
 inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	std::array<torch::Tensor, 2> halfkp = movelist.top().halfkp();
 	torch::Tensor output = model->forward(halfkp[0].to_dense().unsqueeze_(0), halfkp[1].to_dense().unsqueeze_(0));
-	std::cout << output[0][0] << std::endl;
 	int eval = output[0][0].item().to<int>();
-	std::cout << eval << std::endl;
 
 	return eval;
 }
 
 inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model) {
+	alpha = 10;
+	std::cout << alpha << std::endl;
     if (depth == 0) {
         return evaluate(movelist, model);
     }
