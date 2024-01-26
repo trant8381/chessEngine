@@ -1151,10 +1151,10 @@ std::array<torch::Tensor, 2> Position::halfkp() {
 		int popCount = __builtin_popcountll(copy);
 		for (int i = 0; i < popCount; i++) {
 			int piece = lsb(copy);
-			U64 mask = (1ULL << piece);
+
 			int index = halfkpIndex(turn, orient(turn, king), piece, grid[piece].bitboardIndex);
 			indices.push_back(index);
-			if (index > 40959) {
+			if (index > 40960) {
 				std::cout << index << std::endl;
 				std::cout << "bad" << std::endl;
 				std::cout << king << std::endl;

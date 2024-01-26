@@ -58,5 +58,5 @@ namespace Tables {
         "h7", "g7", "f7", "e7", "d7", "c7", "b7", "a7",
         "h8", "g8", "f8", "e8", "d8", "c8", "b8", "a8",
     };
-    constexpr std::array<int, 12> fromPiece = {1, 65, 129, 193, 257, 321, 385, 449, 513, 577, 641, 705};
+    constexpr std::array<int, 12> fromPiece = {1, 65, 129, 193, 257, 321, 385, 449, 0, 0, 513, 577};
 }
