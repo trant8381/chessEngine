@@ -102,8 +102,8 @@ int main() {
 
         for (auto& batch : *testDataloader) {
             torch::Tensor outputs = torch::flatten(model(batch.data, batch.mask)).cuda();
-            std::cout << torch::multiply(outputs, 10000) << std::endl;
-            std::cout << torch::multiply(batch.target, 10000) << std::endl;
+            std::cout << outputs << std::endl;
+            std::cout << batch.target << std::endl;
         }
     }
     evals.close();
