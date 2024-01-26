@@ -11,7 +11,7 @@ inline int searchBlock(bool& bSearchPv, int& beta, int& alpha, int& depth, std::
 		score = -pvSearch(-beta, -alpha, depth - 1, movelist, model, resMovelist);
 	} else {
 		score = -pvSearch(-alpha - 1, -alpha, depth - 1, movelist, model, resMovelist);
-		if ( score > alpha ) {
+		if (score > alpha) {
 			score = -pvSearch(-beta, -alpha, depth - 1, movelist, model, resMovelist);
 		}
 	}
@@ -56,7 +56,8 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
         position.blackMoves(moveset);
     }
 
-	if (moveset.castle.size == 0 && moveset.doubleMoves.size == 0 && moveset.enPassant.size == 0 && moveset.normal.size == 0 && moveset.promotion.size == 0) {
+	if ((moveset.castle.size == 0 && moveset.doubleMoves.size == 0 && moveset.enPassant.size == 0 && moveset.normal.size == 0 && moveset.promotion.size == 0) 
+	|| ((position.whiteKing | position.blackKing) == 0)) {
 		return -1000000;
 	}
 
