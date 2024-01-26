@@ -22,7 +22,7 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	std::array<torch::Tensor, 2> halfkp = movelist.top().halfkp();
 	std::cout << "halfkp" << std::endl;
 	std::cout << halfkp[0].size(0);
-	std::cout << halfkp[0].size(1);
+	std::cout << halfkp[1].size(0);
 	torch::Tensor output = model->forward(halfkp[0].to_dense().unsqueeze_(0), halfkp[1].to_dense().unsqueeze_(0));
 	int eval = output[0][0].item().to<int>();
 	return eval;
