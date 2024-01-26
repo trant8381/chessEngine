@@ -48,6 +48,7 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	for (int move = 0; move < normalSize; move++) {
 		movelist.push(position.makeNormalMove(normalMoves[move][0], normalMoves[move][1]));
 		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
+		std::cout << "searchblock" << std::endl;
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
