@@ -596,10 +596,10 @@ bool Position::whiteMoves(Moveset& moveset) {
 
 	if ((attacks & whiteKing) == 0) {
 		checkMask = Tables::full;
+		knightMoves(moveset, whitePieces, whiteKnights);
 		bishopMoves(moveset, whitePieces, whiteBishops);
 		rookMoves(moveset, whitePieces, whiteRooks);
 		queenMoves(moveset, whitePieces, whiteQueens);
-		knightMoves(moveset, whitePieces, whiteKnights);
 		whitePawnMoves(moveset);
 
 		return 0;
@@ -647,10 +647,10 @@ bool Position::whiteMoves(Moveset& moveset) {
 	}
 
 	// get other moves
+	knightMoves(moveset, whitePieces, whiteKnights);
 	bishopMoves(moveset, whitePieces, whiteBishops);
 	rookMoves(moveset, whitePieces, whiteRooks);
 	queenMoves(moveset, whitePieces, whiteQueens);
-	knightMoves(moveset, whitePieces, whiteKnights);
 	whitePawnMoves(moveset);
 
 	return 0;
