@@ -1158,6 +1158,7 @@ std::array<torch::Tensor, 2> Position::halfkp() {
 			int index = halfkpIndex(turn, orient(turn, king), piece, grid[piece].bitboardIndex);
 			indices.push_back(index);
 			if (index > 40959) {
+				std::cout << index << std::endl;
 				std::cout << "bad" << std::endl;
 			} else if (index < 0) {
 				std::cout << "badneg" << std::endl;
