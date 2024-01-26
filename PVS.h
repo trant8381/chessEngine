@@ -29,6 +29,10 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 	std::cout << "half1" << std::endl;
 	torch::Tensor half2 = denseHalf2.unsqueeze_(0);
 	std::cout << "half2" << std::endl;
+	std::cout << half1.size(0) << std::endl;
+	std::cout << half2.size(0) << std::endl;
+	std::cout << half1.size(1) << std::endl;
+	std::cout << half2.size(1) << std::endl;
 	torch::Tensor output = model->forward(half1, half2);
 	std::cout << output << std::endl;
 	int eval = output[0][0].item().to<int>();
