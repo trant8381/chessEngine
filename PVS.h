@@ -28,7 +28,7 @@ inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
 }
 
 inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& movelist, NNUE& model) {
-	std::cout << "here" << std::endl;
+	// std::cout << "here" << std::endl;
     if (depth == 0) {
         return evaluate(movelist, model);
     }
@@ -38,23 +38,23 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
     Moveset moveset;
 	Position position = movelist.top();
 
-	std::cout << "premoveset" << std::endl;
+	// std::cout << "premoveset" << std::endl;
     if (position.isWhiteTurn) {
         position.whiteMoves(moveset);
     } else {
         position.blackMoves(moveset);
     }
 
-	std::cout << "postmoveset" << std::endl;
+	// std::cout << "postmoveset" << std::endl;
 
     Array<std::array<int, 2>, 218>& normalMoves = moveset.normal;
 	int& normalSize = normalMoves.size;
 	for (int move = 0; move < normalSize; move++) {
-		std::cout << "prenormalMoves" << std::endl;
+		// std::cout << "prenormalMoves" << std::endl;
 		movelist.push(position.makeNormalMove(normalMoves[move][0], normalMoves[move][1]));
-		std::cout << "postnormalMoves" << std::endl;
+		// std::cout << "postnormalMoves" << std::endl;
 		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
-		std::cout << "searchblock" << std::endl;
+		// std::cout << "searchblock" << std::endl;
 		movelist.pop();
 		if (score >= beta) {
 			return beta;

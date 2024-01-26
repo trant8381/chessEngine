@@ -18,6 +18,8 @@ int main() {
     NNUE model;
     torch::load(model, "model20k.pt");
     std::stack<Position> movelist;
+    movelist.push(startPosition);
+    
     std::cout << pvSearch(0, 0, 3, movelist, model) << std::endl;
     return 0;
 }
