@@ -16,7 +16,7 @@ inline int searchBlock(bool bSearchPv, int beta, int alpha, int depth, std::stac
 		}
 	}
 
-	return alpha;
+	return score;
 }
 
 inline int evaluate(std::stack<Position>& movelist, NNUE& model) {
@@ -101,7 +101,7 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	int& doubleMovesSize = doubleMoves.size;
 	for (int move = 0; move < doubleMovesSize; move++) {
 		movelist.push(position.makeDoubleMove(doubleMoves[move][0], doubleMoves[move][1], doubleMoves[move][2]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
