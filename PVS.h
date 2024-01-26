@@ -37,16 +37,22 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	int score = 0;
     Moveset moveset;
 	Position position = movelist.top();
+
+	std::cout << "premoveset" << std::endl;
     if (position.isWhiteTurn) {
         position.whiteMoves(moveset);
     } else {
         position.blackMoves(moveset);
     }
 
+	std::cout << "postmoveset" << std::endl;
+
     Array<std::array<int, 2>, 218>& normalMoves = moveset.normal;
 	int& normalSize = normalMoves.size;
 	for (int move = 0; move < normalSize; move++) {
+		std::cout << "prenormalMoves" << std::endl;
 		movelist.push(position.makeNormalMove(normalMoves[move][0], normalMoves[move][1]));
+		std::cout << "postnormalMoves" << std::endl;
 		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		std::cout << "searchblock" << std::endl;
 		movelist.pop();
