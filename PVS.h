@@ -54,7 +54,7 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 		// std::cout << "prenormalMoves" << std::endl;
 		movelist.push(position.makeNormalMove(normalMoves[move][0], normalMoves[move][1]));
 		// std::cout << "postnormalMoves" << std::endl;
-		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		// std::cout << "searchblock" << std::endl;
 		movelist.pop();
 		if (score >= beta) {
@@ -71,7 +71,7 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	for (int move = 0; move < castleSize; move++) {
 		movelist.push(position.makeCastlingMove(castleMoves[move][0][0], castleMoves[move][0][1],
 						 		 				castleMoves[move][1][0], castleMoves[move][1][1]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
@@ -86,7 +86,7 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	int& enPassantSize = enPassantMoves.size;
 	for (int move = 0; move < enPassantSize; move++) {
 		movelist.push(position.makeEnPassantMove(enPassantMoves[move][0], enPassantMoves[move][1], enPassantMoves[move][2]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
@@ -116,7 +116,7 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
 	int& promotionSize = promotions.size;
 	for (int move = 0; move < promotionSize; move++) {
 		movelist.push(position.makePromotionMove(promotions[move][0], promotions[move][1], promotions[move][2]));
-		searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
+		score = searchBlock(bSearchPv, beta, alpha, depth, movelist, model);
 		movelist.pop();
 		if (score >= beta) {
 			return beta;
