@@ -16,17 +16,31 @@
 int main() {
     Position startPosition;
     NNUE model;
-    torch::load(model, "model20k.pt");
+    std::string fen;
+    torch::load(model, "model.pt");
     model->to(torch::Device(torch::kCUDA));
-    startPosition.setFen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
+    std::cout << "Enter fen: ";
+    std::cin >> fen;
+    startPosition.setFen(fen);
     bool opponentTurn;
     std::cout << "Is it opponent's turn to play?";
     std::cin >> opponentTurn;
     std::stack<Position> movelist;
     movelist.push(startPosition);
     while (true) {
+        Position position = movelist.top();
+        Moveset moveset;
+        if (position.isWhiteTurn) {
+            position.whiteMoves(moveset);
+        } else {
+            position.blackMoves(moveset);
+        }
+
+        if ((moveset.castle.size == 0 && moveset.doubleMoves.size == 0 && moveset.enPassant.size == 0 && moveset.normal.size == 0 && moveset.promotion.size == 0)) {
+            
+        }
+
         if (opponentTurn) {
-            Position position = movelist.top();
             std::string move;
             std::stringstream ssMove;
             ssMove << move;

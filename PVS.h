@@ -42,8 +42,7 @@ inline int pvSearch(int alpha, int beta, int depth, std::stack<Position>& moveli
         position.blackMoves(moveset);
     }
 
-	if ((moveset.castle.size == 0 && moveset.doubleMoves.size == 0 && moveset.enPassant.size == 0 && moveset.normal.size == 0 && moveset.promotion.size == 0) 
-	|| ((position.whiteKing | position.blackKing) == 0)) {
+	if ((moveset.castle.size == 0 && moveset.doubleMoves.size == 0 && moveset.enPassant.size == 0 && moveset.normal.size == 0 && moveset.promotion.size == 0)) {
 		return -1000000;
 	}
 
