@@ -43,9 +43,9 @@ int main() {
         if (opponentTurn) {
             std::string move;
             std::stringstream ssMove;
-            ssMove << move;
             std::cout << "Please make a move." << std::endl;
             std::getline(std::cin, move);
+            ssMove << move;
             int start;
             int end;
 
