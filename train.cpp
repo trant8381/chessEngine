@@ -57,8 +57,8 @@ int main() {
         position.setFen(fen);
         std::array<torch::Tensor, 2> halfkp = position.halfkp();
 
-        if (inputs > 100000) {
-            if (inputs == 100012) {
+        if (inputs > 300000) {
+            if (inputs == 300012) {
                 break;
             }
             testHalf1Data.push_back(halfkp[0]);
@@ -78,8 +78,8 @@ int main() {
 
     auto trainDataset = CustomDataset(trainHalf1Data, trainOutputData, trainHalf2Data).map(Stack<Example3>());
     auto testDataset = CustomDataset(testHalf1Data, testOutputData, testHalf2Data).map(Stack<Example3>());
-    auto trainDataloader = torch::data::make_data_loader(trainDataset, 64);
-    auto testDataloader = torch::data::make_data_loader(testDataset, 64);
+    auto trainDataloader = torch::data::make_data_loader(trainDataset, 256);
+    auto testDataloader = torch::data::make_data_loader(testDataset, 256);
 
     for (int epoch = 0; epoch < 50; epoch++) {
         std::cout << "Epoch: " << epoch << std::endl;

@@ -11,7 +11,7 @@ inline int searchBlock(bool& bSearchPv, int& beta, int& alpha, int& depth, std::
 		score = -pvSearch(-beta, -alpha, depth - 1, movelist, model, resMovelist);
 	} else {
 		score = -pvSearch(-alpha - 1, -alpha, depth - 1, movelist, model, resMovelist);
-		if (score > alpha) {
+		if (score > alpha && score < beta) {
 			score = -pvSearch(-beta, -alpha, depth - 1, movelist, model, resMovelist);
 		}
 	}
