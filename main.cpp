@@ -41,38 +41,37 @@ int main() {
         }
 
         if (opponentTurn) {
+	    char moveType;
             std::string move;
-            std::stringstream ssMove;
             std::cout << "Please make a move." << std::endl;
-            std::getline(std::cin, move);
-            ssMove << move;
+            std::cin >> moveType;
             int start;
             int end;
 
-            switch (move[0]) {
+            switch (moveType) {
                 case 'n':
-                    ssMove >> start >> end;
+                    std::cin >> start >> end;
                     movelist.push(position.makeNormalMove(start, end));
                     break;
                 case 'e':
                     int capture;
-                    ssMove >> start >> end >> capture;
+                    std::cin >> start >> end >> capture;
                     movelist.push(position.makeEnPassantMove(start, end, capture));
                     break;
                 case 'd':
                     int enPassant;
-                    ssMove >> start >> end;
+                    std::cin >> start >> end;
                     movelist.push(position.makeDoubleMove(start, end, enPassant));
                     break;
                 case 'c':
                     int start2;
                     int end2;
-                    ssMove >> start >> end >> start2 >> end2;
+                    std::cin >> start >> end >> start2 >> end2;
                     movelist.push(position.makeCastlingMove(start, end, start2, end2));
                     break;
                 case 'p':
                     int index;
-                    ssMove >> start >> end >> index;
+                    std::cin >> start >> end >> index;
                     movelist.push(position.makePromotionMove(start, end, index));
                     break;
             }
