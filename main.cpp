@@ -24,38 +24,51 @@ int main() {
     std::cin >> opponentTurn;
     std::stack<Position> movelist;
     movelist.push(startPosition);
+    while (true) {
+        if (opponentTurn) {
+            Position position = movelist.top();
+            std::string move;
+            std::stringstream ssMove;
+            ssMove << move;
+            std::cout << "Please make a move." << std::endl;
+            std::getline(std::cin, move);
+            int start;
+            int end;
 
-    if (opponentTurn) {
-        Position position = movelist.top();
-        std::string move;
-        std::stringstream ssMove;
-        ssMove << move;
-        std::cout << "Please make a move." << std::endl;
-        std::getline(std::cin, move);
-        int start;
-        int end;
-
-        switch (move[0]) {
-            case 'n':
-                ssMove >> start >> end;
-                movelist.push(position.makeNormalMove(start, end));
-                break;
-            case 'e':
-                int capture;
-                ssMove >> start >> end >> capture;
-                movelist.push(position.makeEnPassantMove(start, end, capture));
-                break;
-            case 'd':
-                int enPassant;
-                ssMove >> start >> end;
-                movelist.push(position.makeDoubleMove(start, end, enPassant));
-                break;
-
+            switch (move[0]) {
+                case 'n':
+                    ssMove >> start >> end;
+                    movelist.push(position.makeNormalMove(start, end));
+                    break;
+                case 'e':
+                    int capture;
+                    ssMove >> start >> end >> capture;
+                    movelist.push(position.makeEnPassantMove(start, end, capture));
+                    break;
+                case 'd':
+                    int enPassant;
+                    ssMove >> start >> end;
+                    movelist.push(position.makeDoubleMove(start, end, enPassant));
+                    break;
+                case 'c':
+                    int start2;
+                    int end2;
+                    ssMove >> start >> end >> start2 >> end2;
+                    movelist.push(position.makeCastlingMove(start, end, start2, end2));
+                    break;
+                case 'p':
+                    int index;
+                    ssMove >> start >> end >> index;
+                    movelist.push(position.makePromotionMove(start, end, index));
+                    break;
+            }
+        } else {
+            std::stack<Position> resMovelist = movelist;
+            std::cout << pvSearch(-1000000, 1000000, 3, movelist, model, resMovelist) << std::endl;
+            std::cout << resMovelist.top().toFen() << std::endl;
         }
-    } else {
-        std::stack<Position> resMovelist = movelist;
-        std::cout << pvSearch(-1000000, 1000000, 3, movelist, model, resMovelist) << std::endl;
-        std::cout << resMovelist.top().toFen() << std::endl;
+
+        opponentTurn = !opponentTurn;
     }
     return 0;
 }

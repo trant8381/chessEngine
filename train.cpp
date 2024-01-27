@@ -105,6 +105,7 @@ int main() {
             std::cout << outputs << std::endl;
             std::cout << batch.target << std::endl;
         }
+        torch::save(model, "model.pt");
     }
     evals.close();
     positions.close();
